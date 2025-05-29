@@ -1,5 +1,6 @@
 import { rmSync } from 'fs';
 import { ok, type Result } from 'neverthrow';
+import type { Torrent } from 'webtorrent';
 import WebTorrent from 'webtorrent';
 import type { NcoreService } from '../ncore';
 import type { TorrentResponse, TorrentStoreStats } from './types';
@@ -10,7 +11,7 @@ import { createTorrentServerError, type TorrentServerError } from '@/errors';
 import { HttpStatusCode } from '@/types/http';
 
 export class WebtorrentAdapter extends TorrentStoreService {
-  private webtorrent: WebTorrent.Instance;
+  private webtorrent: WebTorrent;
   constructor(private ncore: NcoreService) {
     super(ncore);
     this.webtorrent = new WebTorrent({});
@@ -18,7 +19,7 @@ export class WebtorrentAdapter extends TorrentStoreService {
 
   public async startServer(): Promise<void> {}
 
-  private mapToTorrentResponse(torrent: WebTorrent.Torrent): TorrentResponse {
+  private mapToTorrentResponse(torrent: Torrent): TorrentResponse {
     return {
       infoHash: torrent.infoHash,
       name: torrent.name,
@@ -38,14 +39,14 @@ export class WebtorrentAdapter extends TorrentStoreService {
     torrentFilePath: string,
   ): Promise<Result<TorrentResponse, TorrentServerError>> {
     try {
-      const torrent = await new Promise<WebTorrent.Torrent>((resolve) => {
+      const torrent = await new Promise<Torrent>((resolve) => {
         this.webtorrent.add(
           torrentFilePath,
           {
             path: env.DOWNLOADS_DIR,
             deselect: true,
           },
-          (torrent: WebTorrent.Torrent) => {
+          (torrent: Torrent) => {
             resolve(torrent);
           },
         );

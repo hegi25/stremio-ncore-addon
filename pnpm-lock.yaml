@@ -274,9 +274,6 @@ importers:
       '@types/stremio-addon-sdk':
         specifier: ^1.6.11
         version: 1.6.11(patch_hash=6ndreer2lkknqs653uu7f7ha5a)
-      '@types/webtorrent':
-        specifier: ^0.110.0
-        version: 0.110.0(patch_hash=f4g6x3pvdqg7cjpiwzkixqanw4)
       drizzle-kit:
         specifier: ^0.30.1
         version: 0.30.1
@@ -2198,9 +2195,6 @@ packages:
   '@types/better-sqlite3@7.6.12':
     resolution: {integrity: sha512-fnQmj8lELIj7BSrZQAdBMHEHX8OZLYIHXqAKT1O7tDfLxaINzf00PMjw22r3N/xXh0w/sGHlO6SVaCQ2mj78lg==}
 
-  '@types/bittorrent-protocol@3.1.6':
-    resolution: {integrity: sha512-hqiRctJX9t9kknr6nn0q7UlcWHKvw2gSnPc/4jxt7Q/T0RP9txNv27Djue9ZjCNlAJ+irqAnCxtb+TcSpMyhtA==}
-
   '@types/content-disposition@0.5.8':
     resolution: {integrity: sha512-QVSSvno3dE0MgO76pJhmv4Qyi/j0Yk9pBp0Y7TJ2Tlj+KCgJWY6qX7nnxCOLkZ3VYRSIk1WTxCvwUSdx6CCLdg==}
 
@@ -2264,9 +2258,6 @@ packages:
   '@types/set-cookie-parser@2.4.10':
     resolution: {integrity: sha512-GGmQVGpQWUe5qglJozEjZV/5dyxbOOZ0LHe/lqyWssB88Y4svNfst0uqBVscdDeIKl5Jy5+aPSvy7mI9tYRguw==}
 
-  '@types/simple-peer@9.11.8':
-    resolution: {integrity: sha512-rvqefdp2rvIA6wiomMgKWd2UZNPe6LM2EV5AuY3CPQJF+8TbdrL5TjYdMf0VAjGczzlkH4l1NjDkihwbj3Xodw==}
-
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
 
@@ -2275,9 +2266,6 @@ packages:
 
   '@types/tough-cookie@4.0.5':
     resolution: {integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==}
-
-  '@types/webtorrent@0.110.0':
-    resolution: {integrity: sha512-f2Moh9KWdHqYT1N5hxbaCw213SyYyyHhxOoxJI4c53nwAiq4JCytpySV8cM5FC9oPOE7Y/4nPYbnreJNl9lJRA==}
 
   '@types/ws@8.5.13':
     resolution: {integrity: sha512-osM/gWBTPKgHV8XkTunnegTRIsvF6owmf5w+JtAfOw472dptdm0dlGv4xCt6GwQRcC2XVOvvRE/0bAoQcL2QkA==}
@@ -7903,10 +7891,6 @@ snapshots:
     dependencies:
       '@types/node': 22.10.2
 
-  '@types/bittorrent-protocol@3.1.6':
-    dependencies:
-      '@types/node': 22.10.2
-
   '@types/content-disposition@0.5.8': {}
 
   '@types/estree@1.0.6': {}
@@ -7978,22 +7962,11 @@ snapshots:
     dependencies:
       '@types/node': 22.10.2
 
-  '@types/simple-peer@9.11.8':
-    dependencies:
-      '@types/node': 22.10.2
-
   '@types/stack-utils@2.0.3': {}
 
   '@types/stremio-addon-sdk@1.6.11(patch_hash=6ndreer2lkknqs653uu7f7ha5a)': {}
 
   '@types/tough-cookie@4.0.5': {}
-
-  '@types/webtorrent@0.110.0(patch_hash=f4g6x3pvdqg7cjpiwzkixqanw4)':
-    dependencies:
-      '@types/bittorrent-protocol': 3.1.6
-      '@types/node': 22.10.2
-      '@types/parse-torrent': 5.8.7(patch_hash=se6jn4y6y5tybrz3dg4xzlxfri)
-      '@types/simple-peer': 9.11.8
 
   '@types/ws@8.5.13':
     dependencies:
