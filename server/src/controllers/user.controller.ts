@@ -46,7 +46,7 @@ export class UserController {
     const userDetails = c.req.valid('json');
     const userId = c.req.param('userId');
     if (!isInteger(userId)) {
-      throw new HTTPException(HttpStatusCode.BAD_REQUEST, { message: 'Invalid user ID' });
+      return c.json({ message: 'Invalid user ID' }, HttpStatusCode.BAD_REQUEST);
     }
     const updatedUser = await this.userService.updateUser(Number(userId), userDetails);
     return c.json(updatedUser);
@@ -65,7 +65,7 @@ export class UserController {
     }
     const userId = c.req.param('userId');
     if (!isInteger(userId)) {
-      throw new HTTPException(HttpStatusCode.BAD_REQUEST, { message: 'Invalid user ID' });
+      return c.json({ message: 'Invalid user ID' }, HttpStatusCode.BAD_REQUEST);
     }
     const { password } = c.req.valid('json');
     await this.userService.updateUserPassword(Number(userId), password);
@@ -79,7 +79,7 @@ export class UserController {
     }
     const userId = c.req.param('userId');
     if (!isInteger(userId)) {
-      throw new HTTPException(HttpStatusCode.BAD_REQUEST, { message: 'Invalid user ID' });
+      return c.json({ message: 'Invalid user ID' }, HttpStatusCode.BAD_REQUEST);
     }
     await this.userService.deleteUser(Number(userId));
     return c.json({ message: 'User deleted successfully' });

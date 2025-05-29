@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreateConfigRequest, createConfigSchema } from '@server/schemas/config.schema';
+import { useLocation } from 'wouter';
 import { defaultSetupFormValues } from '../constants';
 import { NonAdminUsers } from './non-admin-users';
 import { UserFields } from './user-fields';
@@ -23,8 +24,10 @@ import { api } from '@/api';
 import { QueryKeys } from '@/constants/query-keys';
 import { handleError, HttpError } from '@/lib/errors';
 import { SettingsFormFields } from '@/components/settings/settings-form-fields';
+import { ROUTES } from '@/constants/routes';
 
 export const SetupForm = () => {
+  const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const { mutateAsync } = useMutation({
     mutationFn: async (data: CreateConfigRequest) => {
@@ -51,6 +54,7 @@ export const SetupForm = () => {
 
   const onSubmit = form.handleSubmit(async (data) => {
     await mutateAsync(data);
+    navigate(ROUTES.LOGIN);
   });
 
   return (

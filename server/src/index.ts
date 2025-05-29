@@ -26,9 +26,12 @@ import {
 } from './schemas/user.schema';
 import { HttpsService } from './services/https';
 import { logger, requestLogger } from './logger';
+import { streamQuerySchema } from './schemas/stream.schema';
+import { playSchema } from './schemas/play.schema';
 import { UserService } from '@/services/user';
 import { ManifestService } from '@/services/manifest';
-import { TorrentStoreService } from '@/services/torrent-store';
+import type { TorrentStoreService } from '@/services/torrent-store';
+import { WebtorrentAdapter, TorrentServerAdapter } from '@/services/torrent-store';
 import { TorrentService } from '@/services/torrent';
 import { StreamService } from '@/services/stream';
 
@@ -37,8 +40,7 @@ import { AuthController } from '@/controllers/auth.controller';
 import { StreamController } from '@/controllers/stream.controller';
 import { TorrentController } from '@/controllers/torrent.controller';
 
-import { NcoreService } from '@/services/torrent-source/ncore';
-import { TorrentSourceManager } from '@/services/torrent-source';
+import { NcoreService } from '@/services/ncore';
 import { loginSchema } from '@/schemas/login.schema';
 import {
   applyServeStatic,
@@ -61,36 +63,41 @@ const manifestService = new ManifestService(
 );
 const torrentService = new TorrentService();
 const cinemetaService = new CinemeatService();
-const torrentSource = new TorrentSourceManager([
-  env.NCORE_URL && env.NCORE_USERNAME && env.NCORE_PASSWORD
-    ? new NcoreService(
-        torrentService,
-        cinemetaService,
-        env.NCORE_URL,
-        env.NCORE_USERNAME,
-        env.NCORE_PASSWORD,
-      )
-    : null,
-]);
+const ncoreService = new NcoreService(
+  torrentService,
+  cinemetaService,
+  env.NCORE_URL,
+  env.NCORE_USERNAME,
+  env.NCORE_PASSWORD,
+);
 
 const isAuthenticated = createAuthMiddleware(sessionService);
 const isAdmin = createAdminMiddleware(sessionService);
 const isAdminOrSelf = createAdminOrSelfMiddleware(sessionService);
 const isDeviceAuthenticated = createDeviceTokenMiddleware(userService);
 
-const torrentStoreService = new TorrentStoreService(torrentSource);
+let torrentStoreService: TorrentStoreService;
+switch (env.TORRENT_STORE_ADAPTER) {
+  case 'webtorrent':
+    torrentStoreService = new WebtorrentAdapter(ncoreService);
+    break;
+  case 'torrent-server':
+  default:
+    torrentStoreService = new TorrentServerAdapter(ncoreService);
+    break;
+}
 await torrentStoreService.startServer();
 const streamService = new StreamService(configService, userService);
 configService.torrentStoreService = torrentStoreService;
 const httpsService = new HttpsService();
 
-const configController = new ConfigController(configService, torrentSource);
+const configController = new ConfigController(configService, ncoreService);
 const manifestController = new ManifestController(manifestService);
 const authController = new AuthController(userService, sessionService);
 const deviceTokenController = new DeviceTokenController(deviceTokenService);
 const userController = new UserController(userService);
 const streamController = new StreamController(
-  torrentSource,
+  ncoreService,
   torrentService,
   streamService,
   userService,
@@ -126,9 +133,7 @@ const app = new Hono<HonoEnv>()
   )
 
   .get('/config/is-configured', (c) => configController.getIsConfigured(c))
-  .get('/config/torrent-sources/issues', (c) =>
-    configController.getTorrentSourceConfigIssues(c),
-  )
+  .get('/config/issues', (c) => configController.getConfigIssues(c))
   .get('/config', isAuthenticated, (c) => configController.getConfig(c))
   .post('/config', zValidator('json', createConfigSchema), (c) =>
     configController.createConfig(c),
@@ -172,12 +177,16 @@ const app = new Hono<HonoEnv>()
     (c) => deviceTokenController.deleteDeviceToken(c),
   )
 
-  .get('/auth/:deviceToken/stream/:type/:imdbId', isDeviceAuthenticated, (c) =>
-    streamController.getStreamsForMedia(c),
+  .get(
+    '/auth/:deviceToken/stream/:type/:imdbId',
+    isDeviceAuthenticated,
+    zValidator('param', streamQuerySchema),
+    (c) => streamController.getStreamsForMedia(c),
   )
   .get(
-    '/auth/:deviceToken/stream/play/:sourceName/:sourceId/:infoHash/:fileIdx',
+    '/auth/:deviceToken/stream/play/:ncoreId/:infoHash/:filePath',
     isDeviceAuthenticated,
+    zValidator('param', playSchema),
     (c) => streamController.play(c),
   )
 

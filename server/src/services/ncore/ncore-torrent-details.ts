@@ -2,8 +2,8 @@ import {
   TorrentDetails,
   type ParsedTorrentDetails,
   type TorrentFileDetails,
-} from '../types';
-import type { NcoreTorrent } from './types';
+} from '../torrent';
+import type { NcoreTorrent } from './ncore-types';
 import type { TorrentCategory } from './constants';
 import {
   HUNGARIAN_CATEGORIES,

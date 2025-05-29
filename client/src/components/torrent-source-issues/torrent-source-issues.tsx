@@ -9,7 +9,7 @@ export const TorrentSourceIssues = () => {
     queryKey: [QueryKeys.TORRENT_SOURCE_ISSUES],
     retry: 0,
     queryFn: async () => {
-      const request = await api.config['torrent-sources'].issues.$get();
+      const request = await api.config.issues.$get();
       const response = await request.json();
       return response;
     },
@@ -33,8 +33,8 @@ export const TorrentSourceIssues = () => {
             <Alert
               key={issue.id}
               variant="error"
-              title={issue.sourceName}
-              description={issue.message}
+              title={issue.title}
+              description={issue.description}
             />
           ))}
         </ul>

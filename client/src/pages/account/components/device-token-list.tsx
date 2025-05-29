@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState, type PropsWithChildren } from 'react';
 import { DeviceToken } from '@server/db/schema/device-tokens';
 import { toast } from 'sonner';
@@ -15,12 +15,14 @@ import {
 } from '@/components/ui/accordion';
 import { MutationKeys } from '@/constants/mutation-keys';
 import { handleError, HttpError } from '@/lib/errors';
+import { QueryKeys } from '@/constants/query-keys';
 
 const List = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col gap-y-3">{children}</div>
 );
 
 export const DeviceTokenList = () => {
+  const queryClient = useQueryClient();
   const [openedDeviceToken, setOpenedDeviceToken] = useState('');
   const {
     data = [],
@@ -44,7 +46,10 @@ export const DeviceTokenList = () => {
       return await req.json();
     },
     onError: (e) => handleError(e, 'Failed to delete device token'),
-    onSuccess: () => toast.success('Device token deleted successfully'),
+    onSuccess: () => {
+      toast.success('Device token deleted successfully');
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.USERS] });
+    },
     mutationKey: [MutationKeys.DELETE_DEVICE_TOKEN, openedDeviceToken],
   });
 

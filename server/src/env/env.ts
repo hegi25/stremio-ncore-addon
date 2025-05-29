@@ -1,8 +1,12 @@
 import { z } from 'zod';
+import { TorrentAdapters } from '@/services/torrent-store';
 
 export const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+    TORRENT_STORE_ADAPTER: z
+      .nativeEnum(TorrentAdapters)
+      .default(TorrentAdapters.TORRENT_SERVER),
     PORT: z.coerce.number().default(3000),
     HTTPS_PORT: z.coerce.number().default(3443),
     TORRENT_SERVER_PORT: z.coerce.number().default(8080),

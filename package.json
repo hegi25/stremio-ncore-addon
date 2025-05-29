@@ -8,10 +8,9 @@
     "build:server": "pnpm --filter server build",
     "build:client": "pnpm --filter client build",
     "build:torrent-server": "pnpm --filter torrent-server build",
-    "dev": "pnpm dev:server & pnpm dev:client & pnpm dev:torrent-server",
+    "dev": "pnpm dev:server & pnpm dev:client",
     "dev:server": "pnpm --filter server dev",
     "dev:client": "pnpm --filter client dev",
-    "dev:torrent-server": "pnpm --filter torrent-server dev",
     "start": "NODE_ENV=production node dist/server/index.js",
     "preview": "NODE_ENV=production node --env-file .env dist/server/index.js",
     "ci": "pnpm check-formatting && pnpm lint && pnpm test",
@@ -37,7 +36,8 @@
     "allowNonAppliedPatches": true,
     "patchedDependencies": {
       "@types/parse-torrent": "patches/@types__parse-torrent.patch",
-      "@types/stremio-addon-sdk": "patches/@types__stremio-addon-sdk.patch"
+      "@types/stremio-addon-sdk": "patches/@types__stremio-addon-sdk.patch",
+      "@types/webtorrent": "patches/@types__webtorrent.patch"
     }
   },
   "packageManager": "pnpm@9.12.2"

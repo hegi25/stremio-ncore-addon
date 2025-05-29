@@ -1,11 +1,12 @@
 import parseTorrent from 'parse-torrent';
 import contentDisposition from 'content-disposition';
+import { ok, type Result } from 'neverthrow';
 import type { ParsedTorrentDetails } from './types';
 import { writeFileWithCreateDir } from '@/utils/files';
 import { env } from '@/env';
 import { Cached, DEFAULT_TTL } from '@/utils/cache';
-import { throwServerError } from '@/utils/errors';
 import { logger } from '@/logger';
+import { createTorrentDownloadError, type TorrentDownloadError } from '@/errors';
 
 export class TorrentService {
   @Cached({
@@ -16,7 +17,7 @@ export class TorrentService {
   })
   public async downloadAndParseTorrent(
     torrentUrl: string,
-  ): Promise<ParsedTorrentDetails> {
+  ): Promise<Result<ParsedTorrentDetails, TorrentDownloadError>> {
     try {
       logger.info(`Fetching and parsing torrent from URL ${torrentUrl}`);
       const torrentResponse = await fetch(torrentUrl, {
@@ -24,7 +25,7 @@ export class TorrentService {
       });
       const buffer = await torrentResponse.arrayBuffer();
       const torrentData = await parseTorrent(new Uint8Array(buffer));
-      return {
+      return ok({
         infoHash: torrentData.infoHash,
         files:
           torrentData.files?.map((file) => ({
@@ -33,22 +34,21 @@ export class TorrentService {
             offset: file.offset,
             path: file.path,
           })) ?? [],
-      };
+      });
     } catch (e) {
-      logger.error(
-        {
-          error: e,
-        },
-        `Failed to fetch and parse torrent from URL ${torrentUrl}`,
-      );
-      throw throwServerError(e, 'Failed to parse torrent');
+      return createTorrentDownloadError('Failed to fetch and parse torrent', {
+        details: { torrentUrl },
+        error: e,
+      });
     }
   }
 
   /**
    * @returns the path to the downloaded torrent file
    */
-  public async downloadTorrentFile(torrentUrl: string): Promise<string> {
+  public async downloadTorrentFile(
+    torrentUrl: string,
+  ): Promise<Result<string, TorrentDownloadError>> {
     logger.info(`Downloading torrent file from URL ${torrentUrl}`);
     try {
       const torrentReq = await fetch(torrentUrl, { signal: AbortSignal.timeout(5_000) });
@@ -63,15 +63,12 @@ export class TorrentService {
 
       writeFileWithCreateDir(torrentFilePath, Buffer.from(torrentArrayBuffer));
       logger.info(`Torrent file downloaded to ${torrentFilePath}`);
-      return torrentFilePath;
+      return ok(torrentFilePath);
     } catch (e) {
-      logger.error(
-        {
-          error: e,
-        },
-        `Failed to download torrent file from URL ${torrentUrl}`,
-      );
-      throw throwServerError(e, 'Failed to download torrent file');
+      return createTorrentDownloadError('Failed to download torrent file', {
+        details: { torrentUrl },
+        error: e,
+      });
     }
   }
 }

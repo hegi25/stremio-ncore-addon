@@ -1,29 +1,42 @@
-import type { CinemetaResponse } from './types';
-import type { StreamType } from '@/schemas/stream.schema';
+import { ok, type Result } from 'neverthrow';
+import { z } from 'zod';
+import { StreamType } from '@/schemas/stream.schema';
 import { env } from '@/env';
-import { throwServerError } from '@/utils/errors';
-import { logger } from '@/logger';
+import type { CinemetaError } from '@/errors';
+import { createCinemetaError } from '@/errors';
+
+const cinemetaResponseSchema = z.object({
+  meta: z.object({
+    imdb_id: z.string(),
+    name: z.string(),
+    type: z.nativeEnum(StreamType),
+  }),
+});
+
+type CinemetaResponse = z.infer<typeof cinemetaResponseSchema>;
 
 export class CinemetaService {
   public async getMetadataByImdbId(
     type: StreamType,
     imdbId: string,
-  ): Promise<CinemetaResponse> {
+  ): Promise<Result<CinemetaResponse, CinemetaError>> {
     try {
       const cinemetaUrl = `${env.CINEMETA_URL}/meta/${type}/${imdbId}.json`;
       const response = await fetch(cinemetaUrl);
       if (!response.ok) {
-        logger.error(
-          {
-            status: response.status,
-          },
-          `Failed to fetch metadata from Cinemeta at URL: ${cinemetaUrl}`,
-        );
-        throw new Error('Failed to fetch stream data from Cinemeta');
+        return createCinemetaError('Failed to fetch metadata from Cinemeta.', {
+          status: response.status,
+          url: cinemetaUrl,
+        });
       }
-      return response.json();
+      const respionseData = await response.json();
+      const parseResult = cinemetaResponseSchema.safeParse(respionseData);
+      if (parseResult.success) {
+        return ok(parseResult.data);
+      }
+      return createCinemetaError('Invalid response from Cinemeta', parseResult.error);
     } catch (error) {
-      throw throwServerError(error, 'Error fetching metadata from Cinemeta');
+      return createCinemetaError('Error fetching metadata from Cinemeta', error);
     }
   }
 }

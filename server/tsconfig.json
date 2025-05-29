@@ -5,8 +5,10 @@
     "target": "ES2022",
     "strict": true,
 
+    "customConditions": ["source"],
+
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",
     "esModuleInterop": true,

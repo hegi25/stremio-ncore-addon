@@ -24,7 +24,6 @@ export const DeviceTokenItem = ({
   onDelete: (token: DeviceToken) => void;
 }) => {
   const { config } = useConfig();
-  console.log('config', config);
   if (!config?.addonUrl) {
     return <LoadingSpinner />;
   }

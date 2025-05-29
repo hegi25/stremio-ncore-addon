@@ -11,11 +11,12 @@ export const createDeviceTokenMiddleware =
   async (c, next) => {
     const deviceToken = c.req.param('deviceToken');
     if (!deviceToken) {
-      throw new HTTPException(HttpStatusCode.UNAUTHORIZED, {
-        message: 'Unauthorized',
-      });
+      throw new HTTPException(HttpStatusCode.UNAUTHORIZED);
     }
-    const user = await userService.getUserByDeviceTokenOrThrow(deviceToken);
+    const user = await userService.getUserByDeviceToken(deviceToken);
+    if (!user) {
+      throw new HTTPException(HttpStatusCode.UNAUTHORIZED);
+    }
     c.set('user', user);
     return next();
   };

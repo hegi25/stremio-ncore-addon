@@ -1,41 +1,30 @@
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
-import { HTTPException } from 'hono/http-exception';
+import { ok, type Result } from 'neverthrow';
 import { PASSWORD_SALT_ROUNDS } from './constants';
 import type { LoginCredentials } from '@/schemas/login.schema';
 import type { Database } from '@/db';
 import { UserRole, usersTable } from '@/db/schema/users';
-import { HttpStatusCode } from '@/types/http';
 import { deviceTokensTable } from '@/db/schema/device-tokens';
 import type { Transaction } from '@/db/client';
 import type { CreateUserRequest, EditUserRequest } from '@/types/user';
 import { User } from '@/types/user';
+import type { AppError } from '@/errors';
+import { createUnauthorizedError, createUserServiceError } from '@/errors';
 
 export class UserService {
   constructor(private db: Database) {}
 
-  public async getUserByDeviceToken(deviceToken: string): Promise<User> {
+  public async getUserByDeviceToken(deviceToken: string): Promise<User | null> {
     const [{ users: user }] = await this.db
       .select()
       .from(deviceTokensTable)
       .leftJoin(usersTable, eq(deviceTokensTable.userId, usersTable.id))
       .where(eq(deviceTokensTable.token, deviceToken));
     if (!user) {
-      throw new HTTPException(HttpStatusCode.UNAUTHORIZED, {
-        message: `User not found for device token "${deviceToken}"`,
-      });
+      return null;
     }
     return new User(user);
-  }
-
-  public async getUserByDeviceTokenOrThrow(deviceToken: string): Promise<User> {
-    const user = await this.getUserByDeviceToken(deviceToken);
-    if (!user) {
-      throw new HTTPException(HttpStatusCode.UNAUTHORIZED, {
-        message: 'Unauthorized',
-      });
-    }
-    return user;
   }
 
   public async getUserByCredentials(credentials: LoginCredentials): Promise<User | null> {
@@ -106,21 +95,20 @@ export class UserService {
     return usersResult;
   }
 
-  public async deleteUser(userId: number) {
+  public async deleteUser(userId: number): Promise<Result<void, AppError>> {
     const [user] = await this.db
       .select()
       .from(usersTable)
       .where(eq(usersTable.id, userId));
     if (!user) {
-      throw new HTTPException(HttpStatusCode.NOT_FOUND, {
-        message: `User with ID ${userId} not found`,
+      return createUserServiceError('User not found for deletion', {
+        userId,
       });
     }
     if (user.role === UserRole.ADMIN) {
-      throw new HTTPException(HttpStatusCode.BAD_REQUEST, {
-        message: 'Cannot delete admin user',
-      });
+      return createUnauthorizedError('Cannot delete admin user');
     }
     await this.db.delete(usersTable).where(eq(usersTable.id, userId));
+    return ok();
   }
 }

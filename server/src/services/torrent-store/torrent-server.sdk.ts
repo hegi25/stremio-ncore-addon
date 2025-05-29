@@ -1,46 +1,53 @@
 import { rm } from 'fs/promises';
+import { ok, type Result } from 'neverthrow';
 import type { AddTorrentRequest, InfoHash, TorrentResponse } from './types';
 import { HttpStatusCode } from '@/types/http';
-import { throwServerError } from '@/utils/errors';
+import { createTorrentServerError, type TorrentServerError } from '@/errors';
 
 export class TorrentServerSdk {
   private torrentFilePaths = new Map<InfoHash, string>();
   constructor(private readonly url: string) {}
 
-  public async getTorrent(infoHash: InfoHash): Promise<TorrentResponse | null> {
+  public async getTorrent(
+    infoHash: InfoHash,
+  ): Promise<Result<TorrentResponse | null, TorrentServerError>> {
     try {
       const req = await fetch(`${this.url}/torrents/${infoHash}`);
       if (!req.ok) {
         if (req.status === HttpStatusCode.NOT_FOUND) {
-          return null;
+          return ok(null);
         }
         const responseText = await req.text();
-        throw Error(
-          `Could not find torrent. Status code: ${req.status}. Error: ${responseText}`,
+        return createTorrentServerError(
+          `Failed to get torrent. Bad response from server.`,
+          { status: req.status, responseText },
         );
       }
-      return (await req.json()) as TorrentResponse;
+      return ok((await req.json()) as TorrentResponse);
     } catch (e) {
-      throw throwServerError(e, `Failed to get torrent - ${infoHash}`);
+      return createTorrentServerError('Failed to get torrent - ${infoHash}', e);
     }
   }
 
-  public async getAllTorrents(): Promise<TorrentResponse[]> {
+  public async getAllTorrents(): Promise<Result<TorrentResponse[], TorrentServerError>> {
     try {
       const req = await fetch(`${this.url}/torrents`);
       if (!req.ok) {
         const responseText = await req.text();
-        throw Error(
-          `Failed to get torrents. Status code: ${req.status}. Error: ${responseText}`,
+        return createTorrentServerError(
+          `Failed to get torrents. Bad response from server.`,
+          { status: req.status, responseText },
         );
       }
-      return (await req.json()) as TorrentResponse[];
+      return ok((await req.json()) as TorrentResponse[]);
     } catch (e) {
-      throw throwServerError(e, 'Failed to get all torrents');
+      return createTorrentServerError('Failed to get all torrents', e);
     }
   }
 
-  public async addTorrent(torrentFilePath: string): Promise<TorrentResponse> {
+  public async addTorrent(
+    torrentFilePath: string,
+  ): Promise<Result<TorrentResponse, TorrentServerError>> {
     try {
       const req = await fetch(`${this.url}/torrents`, {
         method: 'POST',
@@ -51,38 +58,47 @@ export class TorrentServerSdk {
       });
       if (!req.ok) {
         const responseText = await req.text();
-        throw Error(
-          `Could not add torrent. Status code: ${req.status}. Error: ${responseText}`,
+        return createTorrentServerError(
+          `Failed to add torrent. Bad response from server.`,
+          { status: req.status, responseText },
         );
       }
       const torrent = (await req.json()) as TorrentResponse;
       this.torrentFilePaths.set(torrent.infoHash, torrentFilePath);
-      return torrent;
+      return ok(torrent);
     } catch (e) {
-      throw throwServerError(e, `Failed to add torrent - ${torrentFilePath}`);
+      return createTorrentServerError(`Failed to add torrent - ${torrentFilePath}`, e);
     }
   }
 
-  public async deleteTorrent(infoHash: InfoHash): Promise<void> {
+  public async deleteTorrent(
+    infoHash: InfoHash,
+  ): Promise<Result<void, TorrentServerError>> {
     try {
       const req = await fetch(`${this.url}/torrents/${infoHash}`, { method: 'DELETE' });
       if (!req.ok) {
         const responseText = await req.text();
-        throw Error(
-          `Could not delete torrent. Status code: ${req.status}. Error: ${responseText}`,
+        return createTorrentServerError(
+          `Could not delete torrent. Bad response from server.`,
+          { status: req.status, responseText },
         );
       }
       const torrentFilePath = this.torrentFilePaths.get(infoHash);
       if (!torrentFilePath) {
-        throw Error(
-          `Failed to delete torrent file at path: "${torrentFilePath}". File not found.`,
+        return createTorrentServerError(
+          `Failed to delete torrent file. File not found.`,
+          { torrentFilePath },
         );
       }
 
       await rm(torrentFilePath);
       this.torrentFilePaths.delete(infoHash);
+      return ok();
     } catch (e) {
-      throw throwServerError(e, `Failed to delete torrent - ${infoHash}`);
+      return createTorrentServerError(
+        `Failed to delete torrent file at path: "${this.torrentFilePaths.get(infoHash)}".`,
+        e,
+      );
     }
   }
 
