@@ -436,6 +436,8 @@ interface Torrent extends NodeJS.EventEmitter {
 
   readonly maxWebConns: number;
 
+  bitfield: Uint8Array | ArrayLike<number>;
+
   destroy(opts?: TorrentDestroyOptions, cb?: (err: Error | string) => void): void;
 
   addPeer(peer: string | SimplePeer): boolean;
