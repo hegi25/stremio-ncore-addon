@@ -6,7 +6,7 @@ RUN go mod download
 COPY ./torrent-server ./
 RUN CGO_ENABLED=0 GOOS=linux go build -o ./
 
-FROM node:20.16.0-alpine AS node-base
+FROM node:22.16-bookworm-slim AS node-base
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml ./

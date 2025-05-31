@@ -5,6 +5,6 @@
     "build": "go build -o ../dist/torrent-server/torrent-server ./main.go"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.10"
   }
 }
