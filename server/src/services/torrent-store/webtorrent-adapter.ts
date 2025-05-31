@@ -39,17 +39,22 @@ export class WebtorrentAdapter extends TorrentStoreService {
     torrentFilePath: string,
   ): Promise<Result<TorrentResponse, TorrentServerError>> {
     try {
-      const torrent = await new Promise<Torrent>((resolve) => {
-        this.webtorrent.add(
-          torrentFilePath,
-          {
-            path: env.DOWNLOADS_DIR,
-            deselect: true,
-          },
-          (torrent: Torrent) => {
-            resolve(torrent);
-          },
-        );
+      const torrent = await new Promise<Torrent>((resolve, reject) => {
+        try {
+          this.webtorrent.add(
+            torrentFilePath,
+            {
+              path: env.DOWNLOADS_DIR,
+              deselect: true,
+              storeCacheSlots: 0,
+            },
+            (torrent: Torrent) => {
+              resolve(torrent);
+            },
+          );
+        } catch (error: unknown) {
+          reject(error);
+        }
       });
       return ok(this.mapToTorrentResponse(torrent));
     } catch (error: unknown) {
@@ -142,6 +147,10 @@ export class WebtorrentAdapter extends TorrentStoreService {
         `File ${filePath} not found in torrent ${infoHash}`,
         undefined,
       );
+    }
+    // If more than 20% of the file is downloaded, then the user will likely watch it through the end, so we download it fully, not just on demand.
+    if (file.progress > 0.2) {
+      file.select();
     }
     return ok(
       new Response(file.stream(range), {

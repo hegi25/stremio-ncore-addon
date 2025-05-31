@@ -6,7 +6,7 @@
     "source": "./src/index.ts"
   },
   "scripts": {
-    "dev": "tsx watch --env-file=../.env src/index.ts | pino-pretty",
+    "dev": "tsx watch --env-file=../.env --inspect src/index.ts | pino-pretty",
     "start": "node --env-file ../.env ../dist/server/index.js",
     "build": "rm -rf ../dist/server && tsc && tsc-alias && cp -r src/db/migrations ../dist/server/db/migrations",
     "typecheck": "tsc --noemit",
