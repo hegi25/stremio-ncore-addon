@@ -152,11 +152,7 @@ export class StreamController {
       });
     }
 
-    const rangeResult = parseRangeHeader(
-      c.req.header('range'),
-      file.size,
-      30 * 1024 * 1024,
-    ); // 30 MB max chunk size
+    const rangeResult = parseRangeHeader(c.req.header('range'), file.size);
     if (rangeResult.isErr()) {
       logger.error(
         { details: rangeResult.error },
