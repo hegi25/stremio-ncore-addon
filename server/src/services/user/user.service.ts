@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { ok, type Result } from 'neverthrow';
 import { PASSWORD_SALT_ROUNDS } from './constants';
 import type { LoginCredentials } from '@/schemas/login.schema';

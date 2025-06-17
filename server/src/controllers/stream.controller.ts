@@ -163,7 +163,7 @@ export class StreamController {
       });
     }
     const range = rangeResult.value;
-    const responseResult = await this.torrentStoreService.getFileStreamResponse({
+    const responseResult = await this.torrentStoreService.getFileStream({
       infoHash: torrent.infoHash,
       filePath: file.path,
       range,
@@ -175,6 +175,14 @@ export class StreamController {
       );
       throw new HTTPException(HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
-    return responseResult.value;
+    return new Response(responseResult.value, {
+      status: HttpStatusCode.PARTIAL_CONTENT,
+      headers: {
+        'Content-Range': `bytes ${range.start}-${range.end}/${file.size}`,
+        'Content-Length': `${range.end - range.start + 1}`,
+        'Content-Type': mime.getType(file.name) || 'application/octet-stream',
+        'Accept-Ranges': 'bytes',
+      },
+    });
   }
 }

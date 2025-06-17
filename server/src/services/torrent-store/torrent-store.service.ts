@@ -8,7 +8,6 @@ import type { TorrentResponse, TorrentStoreStats } from './types';
 import { createTorrentServerError, type TorrentServerError } from '@/errors';
 import { logger } from '@/logger';
 import { env } from '@/env';
-import { HttpStatusCode } from '@/types/http';
 import { formatBytes } from '@/utils/bytes';
 
 export class TorrentStoreService {
@@ -133,7 +132,7 @@ export class TorrentStoreService {
     }
   }
 
-  public async getFileStreamResponse({
+  public async getFileStream({
     infoHash,
     filePath,
     range,
@@ -141,7 +140,7 @@ export class TorrentStoreService {
     infoHash: string;
     filePath: string;
     range: { start: number; end: number };
-  }): Promise<Result<Response, TorrentServerError>> {
+  }): Promise<Result<ReadableStream, TorrentServerError>> {
     const torrent = await this.webtorrent.get(infoHash);
     if (!torrent) {
       return createTorrentServerError(
@@ -156,21 +155,15 @@ export class TorrentStoreService {
         undefined,
       );
     }
-    // If more than 20% of the file is downloaded, then the user will likely watch it through the end, so we download it fully, not just on demand.
-    if (file.progress > 0.2) {
+
+    if (file.progress > env.PRELOAD_TORRENT_FILE_THRESHOLD) {
       file.select();
     }
-    return ok(
-      new Response(file.stream(range), {
-        status: HttpStatusCode.PARTIAL_CONTENT,
-        headers: {
-          'Content-Range': `bytes ${range.start}-${range.end}/${file.length}`,
-          'Content-Length': `${range.end - range.start + 1}`,
-          'Content-Type': file.type || 'application/octet-stream',
-          'Accept-Ranges': 'bytes',
-        },
-      }),
-    );
+    if (torrent.progress > env.PRELOAD_TORRENT_THRESHOLD) {
+      torrent.select(0, torrent.files.length - 1);
+    }
+
+    return ok(file.stream(range));
   }
 
   public async loadExistingTorrents(): Promise<void> {

@@ -20,7 +20,7 @@
     "@hono/zod-validator": "^0.4.3",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
     "better-sqlite3": "^11.10.0",
     "content-disposition": "^0.5.4",
     "drizzle-orm": "^0.38.4",
