@@ -1,37 +1,177 @@
-import type { Result } from 'neverthrow';
+import { rmSync } from 'fs';
+import { ok, type Result } from 'neverthrow';
 import { globSync } from 'glob';
+import type { Torrent } from 'webtorrent';
+import WebTorrent from 'webtorrent';
 import type { NcoreService } from '../ncore';
 import type { TorrentResponse, TorrentStoreStats } from './types';
-import type { TorrentServerError } from '@/errors';
+import { createTorrentServerError, type TorrentServerError } from '@/errors';
 import { logger } from '@/logger';
 import { env } from '@/env';
+import { HttpStatusCode } from '@/types/http';
+import { formatBytes } from '@/utils/bytes';
 
-export abstract class TorrentStoreService {
-  constructor(private ncoreService: NcoreService) {}
+export class TorrentStoreService {
+  private webtorrent: WebTorrent;
+  constructor(private ncoreService: NcoreService) {
+    this.webtorrent = new WebTorrent({
+      torrentPort: env.TORRENT_PORT,
+    });
+  }
 
-  public abstract startServer(): Promise<void>;
+  public async startServer(): Promise<void> {}
 
-  public abstract addTorrent(
+  private mapToTorrentResponse(torrent: Torrent): TorrentResponse {
+    return {
+      infoHash: torrent.infoHash,
+      name: torrent.name,
+      size: torrent.length,
+      progress: torrent.progress,
+      downloaded: torrent.downloaded,
+      files: torrent.files.map((file) => ({
+        name: file.name,
+        path: file.path,
+        size: file.length,
+        progress: file.progress,
+      })),
+    };
+  }
+
+  public async addTorrent(
     torrentFilePath: string,
-  ): Promise<Result<TorrentResponse, TorrentServerError>>;
+  ): Promise<Result<TorrentResponse, TorrentServerError>> {
+    try {
+      const torrent = await new Promise<Torrent>((resolve, reject) => {
+        try {
+          this.webtorrent.add(
+            torrentFilePath,
+            {
+              path: env.DOWNLOADS_DIR,
+              deselect: true,
+              storeCacheSlots: 0,
+            },
+            (torrent: Torrent) => {
+              resolve(torrent);
+            },
+          );
+        } catch (error: unknown) {
+          reject(error);
+        }
+      });
+      return ok(this.mapToTorrentResponse(torrent));
+    } catch (error: unknown) {
+      return createTorrentServerError(
+        `Failed to add torrent from file path: ${torrentFilePath}`,
+        error,
+      );
+    }
+  }
 
-  public abstract getTorrent(
+  public async getTorrent(
     infoHash: string,
-  ): Promise<Result<TorrentResponse | null, TorrentServerError>>;
+  ): Promise<Result<TorrentResponse | null, TorrentServerError>> {
+    try {
+      const torrent = await this.webtorrent.get(infoHash);
+      if (!torrent) {
+        return ok(null);
+      }
+      return ok(this.mapToTorrentResponse(torrent));
+    } catch (error: unknown) {
+      return createTorrentServerError(
+        `Failed to get torrent with info hash: ${infoHash}`,
+        error,
+      );
+    }
+  }
 
-  public abstract deleteTorrent(
+  public async getTorrents(): Promise<Result<TorrentResponse[], TorrentServerError>> {
+    try {
+      const torrents = this.webtorrent.torrents;
+      return ok(torrents.map((torrent) => this.mapToTorrentResponse(torrent)));
+    } catch (error: unknown) {
+      return createTorrentServerError('Failed to get torrents', error);
+    }
+  }
+
+  public async deleteTorrent(
     infoHash: string,
-  ): Promise<Result<void, TorrentServerError>>;
+  ): Promise<Result<void, TorrentServerError>> {
+    try {
+      const torrent = await this.webtorrent.get(infoHash);
+      if (!torrent) {
+        return ok();
+      }
+      rmSync(torrent.path, { recursive: true });
+      torrent.destroy();
+      return ok();
+    } catch (error: unknown) {
+      return createTorrentServerError(
+        `Failed to delete torrent with info hash: ${infoHash}`,
+        error,
+      );
+    }
+  }
 
-  public abstract getStoreStats(): Promise<
-    Result<TorrentStoreStats[], TorrentServerError>
-  >;
+  public async getStoreStats(): Promise<Result<TorrentStoreStats[], TorrentServerError>> {
+    try {
+      const stats: TorrentStoreStats[] = this.webtorrent.torrents.map((t) => ({
+        hash: t.infoHash,
+        name: t.name,
+        size: formatBytes(t.length),
+        downloaded: formatBytes(t.downloaded),
+        progress: `${(t.progress * 100).toFixed(2)}%`,
+        files: t.files.map((f) => ({
+          name: f.name,
+          size: formatBytes(f.length),
+          downloaded: formatBytes(f.downloaded),
+          progress: `${(f.progress * 100).toFixed(2)}%`,
+        })),
+      }));
+      return ok(stats.sort((a, z) => a.name.localeCompare(z.name)));
+    } catch (error: unknown) {
+      return createTorrentServerError('Failed to get store stats', error);
+    }
+  }
 
-  public abstract getFileStreamResponse(options: {
+  public async getFileStreamResponse({
+    infoHash,
+    filePath,
+    range,
+  }: {
     infoHash: string;
     filePath: string;
     range: { start: number; end: number };
-  }): Promise<Result<Response, TorrentServerError>>;
+  }): Promise<Result<Response, TorrentServerError>> {
+    const torrent = await this.webtorrent.get(infoHash);
+    if (!torrent) {
+      return createTorrentServerError(
+        `Torrent with info hash ${infoHash} not found`,
+        undefined,
+      );
+    }
+    const file = torrent.files.find((f) => f.path === filePath);
+    if (!file) {
+      return createTorrentServerError(
+        `File ${filePath} not found in torrent ${infoHash}`,
+        undefined,
+      );
+    }
+    // If more than 20% of the file is downloaded, then the user will likely watch it through the end, so we download it fully, not just on demand.
+    if (file.progress > 0.2) {
+      file.select();
+    }
+    return ok(
+      new Response(file.stream(range), {
+        status: HttpStatusCode.PARTIAL_CONTENT,
+        headers: {
+          'Content-Range': `bytes ${range.start}-${range.end}/${file.length}`,
+          'Content-Length': `${range.end - range.start + 1}`,
+          'Content-Type': file.type || 'application/octet-stream',
+          'Accept-Ranges': 'bytes',
+        },
+      }),
+    );
+  }
 
   public async loadExistingTorrents(): Promise<void> {
     logger.info('Loading existing torrents into torrent client');
@@ -121,9 +261,4 @@ export abstract class TorrentStoreService {
       logger.info(`Deleted ${deletedCount} unnecessary torrents`);
     }
   };
-}
-
-export enum TorrentAdapters {
-  WEBTORRENT = 'webtorrent',
-  TORRENT_SERVER = 'torrent-server',
 }

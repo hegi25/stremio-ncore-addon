@@ -25,6 +25,6 @@
   "tsc-alias": {
     "resolveFullPaths": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "./webtorrent.d.ts"],
   "exclude": ["**/*.test.*"]
 }

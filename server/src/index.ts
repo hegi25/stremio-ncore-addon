@@ -30,12 +30,7 @@ import { streamQuerySchema } from './schemas/stream.schema';
 import { playSchema } from './schemas/play.schema';
 import { UserService } from '@/services/user';
 import { ManifestService } from '@/services/manifest';
-import type { TorrentStoreService } from '@/services/torrent-store';
-import {
-  WebtorrentAdapter,
-  TorrentServerAdapter,
-  TorrentAdapters,
-} from '@/services/torrent-store';
+import { TorrentStoreService } from '@/services/torrent-store';
 import { TorrentService } from '@/services/torrent';
 import { StreamService } from '@/services/stream';
 
@@ -80,16 +75,8 @@ const isAdmin = createAdminMiddleware(sessionService);
 const isAdminOrSelf = createAdminOrSelfMiddleware(sessionService);
 const isDeviceAuthenticated = createDeviceTokenMiddleware(userService);
 
-let torrentStoreService: TorrentStoreService;
-switch (env.TORRENT_STORE_ADAPTER) {
-  case TorrentAdapters.WEBTORRENT:
-    torrentStoreService = new WebtorrentAdapter(ncoreService);
-    break;
-  case TorrentAdapters.TORRENT_SERVER:
-  default:
-    torrentStoreService = new TorrentServerAdapter(ncoreService);
-    break;
-}
+const torrentStoreService = new TorrentStoreService(ncoreService);
+
 await torrentStoreService.startServer();
 const streamService = new StreamService(configService, userService);
 configService.torrentStoreService = torrentStoreService;
@@ -109,7 +96,7 @@ const streamController = new StreamController(
 );
 const torrentController = new TorrentController(torrentStoreService);
 
-torrentStoreService.loadExistingTorrents();
+await torrentStoreService.loadExistingTorrents();
 
 configService.scheduleDeleteAfterHitnrunCron();
 

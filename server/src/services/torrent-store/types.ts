@@ -6,6 +6,12 @@ export interface TorrentStoreStats {
   progress: string;
   size: string;
   downloaded: string;
+  files: {
+    name: string;
+    progress: string;
+    size: string;
+    downloaded: string;
+  }[];
 }
 
 export interface TorrentFileResponse {

@@ -80,6 +80,12 @@ interface Options {
    * @default -1
    */
   uploadLimit?: number;
+  /**
+   * Port to listen for incoming connections
+   * If set to 0, a random port will be used.
+   * @default 0
+   */
+  torrentPort?: number;
 }
 
 interface ServerAddress {

@@ -1,11 +1,3 @@
-FROM golang:1.24-alpine AS go-build
-WORKDIR /app
-COPY torrent-server/go.mod ./go.mod
-COPY torrent-server/go.sum ./go.sum
-RUN go mod download
-COPY ./torrent-server ./
-RUN CGO_ENABLED=0 GOOS=linux go build -o ./
-
 FROM node:22.16-bookworm-slim AS node-base
 WORKDIR /app
 
@@ -32,7 +24,6 @@ RUN pnpm run build:client
 FROM node-base AS runtime
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
-COPY --from=go-build /app/torrent-server ./dist/torrent-server/torrent-server
 
 ENV NODE_ENV="production"
 ENV ADDON_DIR="/addon"
