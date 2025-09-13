@@ -20,7 +20,7 @@ import { Form } from '@/components/ui/form';
 
 import { Separator } from '@/components/ui/separator';
 import { MutationKeys } from '@/constants/mutation-keys';
-import { api } from '@/api';
+import { client } from '@/api';
 import { QueryKeys } from '@/constants/query-keys';
 import { handleError, HttpError } from '@/lib/errors';
 import { SettingsFormFields } from '@/components/settings/settings-form-fields';
@@ -31,7 +31,7 @@ export const SetupForm = () => {
   const queryClient = useQueryClient();
   const { mutateAsync } = useMutation({
     mutationFn: async (data: CreateConfigRequest) => {
-      const req = await api.config.$post({ json: data });
+      const req = await client.config.$post({ json: data });
       if (!req.ok) {
         throw new HttpError(req);
       }

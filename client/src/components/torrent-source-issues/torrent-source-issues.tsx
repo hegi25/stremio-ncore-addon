@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Alert } from '../ui/alert';
-import { api } from '@/api';
+import { client } from '@/api';
 import { Card } from '@/components/ui/card';
 import { QueryKeys } from '@/constants/query-keys';
 
@@ -9,7 +9,7 @@ export const TorrentSourceIssues = () => {
     queryKey: [QueryKeys.TORRENT_SOURCE_ISSUES],
     retry: 0,
     queryFn: async () => {
-      const request = await api.config.issues.$get();
+      const request = await client.config.issues.$get();
       const response = await request.json();
       return response;
     },

@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { MutationKeys } from '@/constants/mutation-keys';
-import { api } from '@/api';
+import { client } from '@/api';
 import { UserFields } from '@/pages/setup/components/user-fields';
 import { QueryKeys } from '@/constants/query-keys';
 import { handleError, HttpError } from '@/lib/errors';
@@ -37,7 +37,7 @@ export const CreateUserForm = ({ closeModal }: { closeModal: () => void }) => {
 
   const { mutateAsync } = useMutation({
     mutationFn: async (data: CreateUserRequest) => {
-      const req = await api.users.$post({
+      const req = await client.api.users.$post({
         json: data,
       });
       if (!req.ok) {

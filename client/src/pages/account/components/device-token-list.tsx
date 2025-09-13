@@ -4,7 +4,7 @@ import { DeviceToken } from '@server/db/schema/device-tokens';
 import { toast } from 'sonner';
 import { CreateDeviceToken } from './create-device-token';
 import { DeviceTokenItem } from './device-token-item';
-import { api } from '@/api';
+import { client } from '@/api';
 import { Alert } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -31,7 +31,7 @@ export const DeviceTokenList = () => {
     isLoading,
   } = useQuery({
     queryFn: async () => {
-      const req = await api['device-tokens'].$get();
+      const req = await client['device-tokens'].$get();
       return await req.json();
     },
     queryKey: ['device-tokens'],
@@ -39,7 +39,7 @@ export const DeviceTokenList = () => {
 
   const { mutateAsync: deleteDeviceToken } = useMutation({
     mutationFn: async (token: string) => {
-      const req = await api['device-tokens'].$delete({ json: { token } });
+      const req = await client['device-tokens'].$delete({ json: { token } });
       if (!req.ok) {
         throw new HttpError(req);
       }

@@ -28,7 +28,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { api } from '@/api';
+import { client } from '@/api';
 import { MutationKeys } from '@/constants/mutation-keys';
 import { Alert } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -50,7 +50,7 @@ const CreateDeviceTokenForm = ({
   } = useMutation({
     mutationKey: [MutationKeys.CREATE_DEVICE_TOKEN],
     mutationFn: async (data: CreateDeviceTokenFormValues) => {
-      const req = await api['device-tokens'].$post({ json: data });
+      const req = await client['device-tokens'].$post({ json: data });
       if (!req.ok) {
         throw new Error(`Failed to create device token. Status: ${req.status}`);
       }

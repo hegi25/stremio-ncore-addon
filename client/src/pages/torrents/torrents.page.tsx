@@ -5,7 +5,7 @@ import { Redirect } from 'wouter';
 import { UserRole } from '@server/db/schema/users';
 import { DeleteTorrentButton } from './components/delete-torrent-button';
 import { TORRENTS_QUERY_KEY } from './constants';
-import { api } from '@/api';
+import { client } from '@/api';
 import { Alert } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -36,7 +36,7 @@ export const TorrentsPage = () => {
   } = useQuery({
     queryKey: [TORRENTS_QUERY_KEY],
     queryFn: async () => {
-      const req = await api.torrents.$get();
+      const req = await client.torrents.$get();
       return await req.json();
     },
     enabled: !!user && user.role === UserRole.ADMIN,

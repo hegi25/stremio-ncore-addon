@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { api } from '@/api';
+import { client } from '@/api';
 import { UserFields } from '@/pages/setup/components/user-fields';
 import { QueryKeys } from '@/constants/query-keys';
 import { handleError, HttpError } from '@/lib/errors';
@@ -41,7 +41,7 @@ export const EditUserForm = ({
 
   const { mutateAsync } = useMutation({
     mutationFn: async (data: EditUserFormValues) => {
-      const req = await api.users[':userId'].$put({
+      const req = await client.api.users[':userId'].$put({
         json: data.user,
         param: { userId: `${user.id}` },
       });

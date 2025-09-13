@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { api } from '@/api';
+import { client } from '@/api';
 import { MutationKeys } from '@/constants/mutation-keys';
 import { FullScreenLoader } from '@/components/ui/full-screen-loader';
 import { QueryKeys } from '@/constants/query-keys';
@@ -26,7 +26,9 @@ export const DeleteUserModal = ({ open, onOpenChange, user }: DeleteUserModalPro
   const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async () => {
-      const req = await api.users[':userId'].$delete({ param: { userId: `${user.id}` } });
+      const req = await client.api.users[':userId'].$delete({
+        param: { userId: `${user.id}` },
+      });
       onOpenChange(false);
       if (!req.ok) {
         throw new HttpError(req);

@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getUpdateAddonSettingsDefaultValues } from './constants';
 import { MutationKeys } from '@/constants/mutation-keys';
-import { api } from '@/api';
+import { client } from '@/api';
 import { handleError, HttpError } from '@/lib/errors';
 import { Button } from '@/components/ui/button';
 import { SettingsFormFields } from '@/components/settings/settings-form-fields';
@@ -15,7 +15,7 @@ export const UpdateAddonSettingsForm = ({ config }: { config: Configuration }) =
   const { mutateAsync, isPending } = useMutation({
     mutationKey: [MutationKeys.UPDATE_SETTINGS],
     mutationFn: async (data: UpdateConfigRequest) => {
-      const req = await api.config.$put({ json: data });
+      const req = await client.config.$put({ json: data });
       if (!req.ok) {
         throw new HttpError(req);
       }
