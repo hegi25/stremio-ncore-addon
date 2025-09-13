@@ -1,5 +1,4 @@
-// @ts-expect-error - Ignore import error. This is imported from the source of node-cron because this way we don't import node-specific code in the browser.
-import validate from 'node-cron/src/pattern-validation.js';
+import { validate } from 'node-cron';
 import { z } from 'zod';
 import { createUserSchema } from './user.schema';
 
@@ -22,7 +21,6 @@ export const createConfigSchema = z.object({
     }),
   ]),
   admin: createUserSchema,
-  nonAdminUsers: z.array(createUserSchema),
   deleteAfterHitnrun: z.union([
     z.object({ enabled: z.literal(false), cron: z.literal('') }),
     z.object({
@@ -46,7 +44,6 @@ export type CreateConfigRequest = z.infer<typeof createConfigSchema>;
 
 export const updateConfigSchema = createConfigSchema.omit({
   admin: true,
-  nonAdminUsers: true,
 });
 
 export type UpdateConfigRequest = z.infer<typeof updateConfigSchema>;

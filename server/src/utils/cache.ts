@@ -37,3 +37,21 @@ export function Cached<ReturnedT extends {}, Args extends unknown[]>({
     };
   };
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export function cacheFunction<ReturnedT extends {}, Args extends unknown[]>(
+  { generateKey, ...options }: CacheOptions<ReturnedT, Args>,
+  originalFunction: (...args: Args) => Promise<ReturnedT>,
+) {
+  const cache = new LRUCache<string, ReturnedT, unknown>(options);
+  return async function (...args: Args): Promise<ReturnedT> {
+    const key = generateKey(...args);
+    const cachedValue = cache.get(key);
+    if (cachedValue) {
+      return cachedValue;
+    }
+    const result = await originalFunction(...args);
+    cache.set(key, result);
+    return result;
+  };
+}

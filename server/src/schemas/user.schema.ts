@@ -12,7 +12,7 @@ export const createUserSchema = z.object({
     .min(1, 'At least one resolution is required'),
 });
 
-export const editUserSchema = createUserSchema.omit({
+export const updateUserSchema = createUserSchema.omit({
   password: true,
 });
 

@@ -15,13 +15,18 @@ export enum ErrorType {
   TorrentDownloadError = 'TorrentDownloadError',
   NcoreError = 'NcoreError',
   TorrentServerError = 'TorrentServerError',
-  UserServiceError = 'UserServiceError',
+
+  /** When an error occurs during torrent deletion */
+  TorrentDeleteError = 'TorrentDeleteError',
+
   RangeHeaderError = 'RangeHeaderError',
 }
 
-export interface CinemetaError extends ErrorDetails {
+export interface CinemetaError {
   type: ErrorType.CinemetaError;
-  error: unknown;
+  message: string;
+  originalError?: unknown;
+  response?: Response;
 }
 
 export interface MissingConfigError extends ErrorDetails {
@@ -33,7 +38,7 @@ export interface UnknownError extends ErrorDetails {
   error: unknown;
 }
 
-export interface UnauthenticatedError extends ErrorDetails {
+export interface UnauthenticatedError {
   type: ErrorType.UnauthenticatedError;
 }
 
@@ -56,9 +61,11 @@ export interface TorrentServerError extends ErrorDetails {
   error: unknown;
 }
 
-export interface UserServiceError extends ErrorDetails {
-  type: ErrorType.UserServiceError;
-  error: unknown;
+export interface TorrentDeleteError {
+  type: ErrorType.TorrentDeleteError;
+  infoHash: string;
+  path: string;
+  originalError?: unknown;
 }
 
 export interface RangeHeaderError {
@@ -66,7 +73,6 @@ export interface RangeHeaderError {
   message: string;
   rangeHeader: string | undefined;
   fileSize: number;
-  maxChunkSize?: number;
 }
 
 export type AppError =
@@ -78,36 +84,26 @@ export type AppError =
   | TorrentDownloadError
   | NcoreError
   | TorrentServerError
-  | UserServiceError;
+  | TorrentDeleteError;
 
-export function createCinemetaError(
-  message: string,
-  error: unknown,
-): Result<never, CinemetaError> {
-  return err({
-    type: ErrorType.CinemetaError,
-    message,
-    error,
-  });
+function createErrorGenerator<T extends AppError>(type: T['type']) {
+  return (data: Omit<T, 'type'>): Result<never, T> => {
+    return err({
+      type,
+      ...data,
+    } as T);
+  };
 }
 
-export function createMissingConfigError(
-  message: string,
-): Result<never, MissingConfigError> {
-  return err({
-    type: ErrorType.MissingConfigError,
-    message,
-  });
-}
-
-export function createUnauthenticatedError(
-  message: string,
-): Result<never, UnauthenticatedError> {
-  return err({
-    type: ErrorType.UnauthenticatedError,
-    message,
-  });
-}
+export const createCinemetaError = createErrorGenerator<CinemetaError>(
+  ErrorType.CinemetaError,
+);
+export const createMissingConfigError = createErrorGenerator<MissingConfigError>(
+  ErrorType.MissingConfigError,
+);
+export const createUnauthenticatedError = createErrorGenerator<UnauthenticatedError>(
+  ErrorType.UnauthenticatedError,
+);
 
 export function createUnauthorizedError(
   message: string,
@@ -169,28 +165,19 @@ export function createTorrentServerError(
   });
 }
 
-export function createUserServiceError(
-  message: string,
-  error: unknown,
-): Result<never, UserServiceError> {
-  return err({
-    type: ErrorType.UserServiceError,
-    message,
-    error,
-  });
-}
-
 export function createRangeHeaderError(
   message: string,
   rangeHeader: string | undefined,
   fileSize: number,
-  maxChunkSize?: number,
 ): Result<never, RangeHeaderError> {
   return err({
     type: ErrorType.RangeHeaderError,
     message,
     rangeHeader,
     fileSize,
-    maxChunkSize,
   });
 }
+
+export const createTorrentDeleteError = createErrorGenerator<TorrentDeleteError>(
+  ErrorType.TorrentDeleteError,
+);
