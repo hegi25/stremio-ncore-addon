@@ -1,5 +1,5 @@
-import type { CreateConfigRequest } from '@server/schemas/config.schema';
-import { Language, languageValues } from '@server/db/schema/users';
+import type { CreateConfigRequest } from '@sna/server';
+import { Language, languageValues } from '@sna/server';
 
 export type SetupFormValues = CreateConfigRequest;
 
@@ -14,7 +14,6 @@ export const defaultSetupFormValues: SetupFormValues = {
     preferredResolutions: [],
     preferredLanguage: languageValues[0],
   },
-  nonAdminUsers: [],
   deleteAfterHitnrun: {
     enabled: false,
     cron: '',
@@ -23,7 +22,7 @@ export const defaultSetupFormValues: SetupFormValues = {
 
 export const DEFAULT_HITNRUN_CRON = '0 2 * * *';
 
-export const languageLabelLookup: Record<Language, string> = {
+export const languageLabelLookup: Record<string, string> = {
   en: 'English',
   hu: 'Hungarian',
-};
+} satisfies Record<Language, string>;

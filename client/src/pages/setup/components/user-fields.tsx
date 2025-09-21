@@ -2,8 +2,8 @@ import { useFormContext } from 'react-hook-form';
 import {
   languageValues as languageOptions,
   resolutionValues as resolutionOptions,
-} from '@server/db/schema/users';
-import { CreateUserRequest } from '@server/types/user';
+} from '@sna/server';
+import { CreateUserRequest } from '@sna/server';
 import { languageLabelLookup } from '../constants';
 import {
   FormControl,

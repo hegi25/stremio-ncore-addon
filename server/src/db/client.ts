@@ -5,7 +5,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import type { SQLiteTransaction } from 'drizzle-orm/sqlite-core';
 import type { ExtractTablesWithRelations } from 'drizzle-orm';
-import { env } from '@/env';
+import { env } from 'src/env';
 
 const configDir = resolve(env.ADDON_DIR, 'config');
 

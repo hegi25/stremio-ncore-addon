@@ -2,13 +2,13 @@ import { createMiddleware } from 'hono/factory';
 import { getCookie } from 'hono/cookie';
 import { HTTPException } from 'hono/http-exception';
 import type { MiddlewareHandler } from 'hono';
+import type { Session } from 'src/db/schema/sessions';
+import type { User } from 'src/types/user';
+import { HttpStatusCode } from 'src/types/http';
+import { UserRole } from 'src/db/schema/users';
 import { getUserByToken } from '../user/user.utils';
-import { SESSION_COOKIE_NAME } from './auth.constants';
 import { validateSessionToken } from './auth.utils';
-import type { Session } from '@/db/schema/sessions';
-import type { User } from '@/types/user';
-import { HttpStatusCode } from '@/types/http';
-import { UserRole } from '@/db/schema/users';
+import { SESSION_COOKIE_NAME } from './auth.constants';
 
 type CookieAuthEnv = {
   Variables: {

@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useMe } from '@/hooks/use-me';
-import { client } from '@/api';
+import { api } from '@/api';
 import { handleError, HttpError } from '@/lib/errors';
 import { QueryKeys } from '@/constants/query-keys';
 
@@ -33,7 +33,7 @@ export const LoginForm = () => {
   const queryClient = useQueryClient();
   const { mutateAsync: login } = useMutation({
     mutationFn: async (credentials: LoginFormValues) => {
-      const req = await client.login.$post({ json: credentials });
+      const req = await api.login.$post({ json: credentials });
       if (!req.ok) {
         throw new HttpError(req);
       }

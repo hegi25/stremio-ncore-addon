@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { StreamType } from '@/schemas/stream.schema';
-import { Language } from '@/db/schema/users';
+import { StreamType } from 'src/schemas/stream.schema';
+import { Language } from 'src/db/schema/users';
 
 export const streamParamsSchema = z
   .object({

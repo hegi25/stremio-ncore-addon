@@ -1,3 +1,8 @@
+import type { ParsedShow } from '@ctrl/video-filename-parser';
+import { filenameParse, parseResolution } from '@ctrl/video-filename-parser';
+import type { Resolution, Language } from 'src/db/schema/users';
+import { StreamType } from 'src/schemas/stream.schema';
+
 export interface TorrentFileDetails {
   name: string;
   path: string;
@@ -9,11 +14,6 @@ export interface ParsedTorrentDetails {
   infoHash: string;
   files: TorrentFileDetails[];
 }
-
-import type { ParsedShow } from '@ctrl/video-filename-parser';
-import { filenameParse, parseResolution } from '@ctrl/video-filename-parser';
-import type { Resolution, Language } from '@/db/schema/users';
-import { StreamType } from '@/schemas/stream.schema';
 
 export interface TorrentFileDetails {
   name: string;

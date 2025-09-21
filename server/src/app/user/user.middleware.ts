@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm';
 import { createMiddleware } from 'hono/factory';
-import { db } from '@/db';
-import { usersTable } from '@/db/schema/users';
-import { User } from '@/types/user';
-import { HttpStatusCode } from '@/types/http';
+import { db } from 'src/db';
+import { usersTable } from 'src/db/schema/users';
+import { User } from 'src/types/user';
+import { HttpStatusCode } from 'src/types/http';
 
 type UserMiddlewareEnv = {
   Variables: {

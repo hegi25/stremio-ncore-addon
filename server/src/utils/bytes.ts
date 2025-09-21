@@ -1,4 +1,4 @@
-import { logger } from '@/logger';
+import { logger } from 'src/logger';
 
 // copied from https://gist.github.com/zentala/1e6f72438796d74531803cc3833c039c
 export function formatBytes(bytes: number, decimals = 2) {

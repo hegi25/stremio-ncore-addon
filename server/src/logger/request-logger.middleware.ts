@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from 'hono';
+import type { HonoEnv } from 'src/types/hono-env';
 import { logger } from './logger';
-import type { HonoEnv } from '@/types/hono-env';
 
 export const requestLogger: MiddlewareHandler<HonoEnv> = async (c, next) => {
   const start = Date.now();

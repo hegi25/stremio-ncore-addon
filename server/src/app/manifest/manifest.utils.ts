@@ -1,5 +1,5 @@
+import type { User } from 'src/types/user';
 import type { CustomManifest } from './manifest.types';
-import type { User } from '@/types/user';
 
 export function getManifest({
   user,

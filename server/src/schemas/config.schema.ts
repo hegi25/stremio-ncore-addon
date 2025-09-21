@@ -1,4 +1,4 @@
-import { validate } from 'node-cron';
+import { isValidCron } from 'cron-validator';
 import { z } from 'zod';
 import { createUserSchema } from './user.schema';
 
@@ -25,17 +25,7 @@ export const createConfigSchema = z.object({
     z.object({ enabled: z.literal(false), cron: z.literal('') }),
     z.object({
       enabled: z.literal(true),
-      cron: z
-        .string()
-        .min(1)
-        .refine((value) => {
-          try {
-            validate(value);
-            return true;
-          } catch {
-            return false;
-          }
-        }, 'Invalid cron expression.'),
+      cron: z.string().min(1).refine(isValidCron, 'Invalid cron expression.'),
     }),
   ]),
 });

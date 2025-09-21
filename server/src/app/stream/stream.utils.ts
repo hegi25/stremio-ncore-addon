@@ -1,13 +1,13 @@
 import type { Stream } from 'stremio-addon-sdk';
-import type { TorrentDetails, TorrentFileDetails } from '../torrent/torrent.types';
-import type { CinemetaResponse } from './stream.constants';
+import type { StreamType } from 'src/schemas/stream.schema';
+import { env } from 'src/env';
+import type { Resolution } from 'src/db/schema/users';
+import { Language } from 'src/db/schema/users';
+import { rateList } from 'src/utils/rate-list';
+import { formatBytes } from 'src/utils/bytes';
+import type { TorrentDetails, TorrentFileDetails } from '../torrent';
 import { cinemetaResponseSchema, languageEmojiMap } from './stream.constants';
-import type { StreamType } from '@/schemas/stream.schema';
-import { env } from '@/env';
-import type { Resolution } from '@/db/schema/users';
-import { Language } from '@/db/schema/users';
-import { rateList } from '@/utils/rate-list';
-import { formatBytes } from '@/utils/bytes';
+import type { CinemetaResponse } from './stream.constants';
 
 export async function getCinemetaData(
   type: StreamType,

@@ -1,10 +1,10 @@
 import parseTorrent from 'parse-torrent';
 import contentDisposition from 'content-disposition';
+import { writeFileWithCreateDir } from 'src/utils/files';
+import { env } from 'src/env';
+import { cacheFunction, DEFAULT_TTL } from 'src/utils/cache';
+import { logger } from 'src/logger';
 import type { ParsedTorrentDetails } from './torrent.types';
-import { writeFileWithCreateDir } from '@/utils/files';
-import { env } from '@/env';
-import { cacheFunction, DEFAULT_TTL } from '@/utils/cache';
-import { logger } from '@/logger';
 
 export const _fetchTorrent = cacheFunction(
   {

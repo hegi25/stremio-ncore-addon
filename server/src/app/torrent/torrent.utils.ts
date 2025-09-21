@@ -1,11 +1,13 @@
 import { rmSync } from 'node:fs';
-import WebTorrent, { type Torrent as WebtorrentTorrent } from 'webtorrent';
+import { env } from 'src/env';
+import { logger } from 'src/logger';
+import { type Torrent as WebtorrentTorrent } from 'webtorrent';
+import WebTorrent from 'webtorrent';
 import type { Torrent } from './torrent.types';
-import { env } from '@/env';
-import { logger } from '@/logger';
 
 export const _webtorrent = new WebTorrent({
   torrentPort: env.TORRENT_PORT,
+  utp: false,
 });
 
 function _mapToTorrentResponse(torrent: WebtorrentTorrent): Torrent {

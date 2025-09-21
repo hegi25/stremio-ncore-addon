@@ -2,10 +2,10 @@ import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { useQuery } from '@tanstack/react-query';
 import { PropsWithChildren } from 'react';
 import { Redirect } from 'wouter';
-import { UserRole } from '@server/db/schema/users';
+import { UserRole } from '@sna/server';
 import { DeleteTorrentButton } from './components/delete-torrent-button';
 import { TORRENTS_QUERY_KEY } from './constants';
-import { client } from '@/api';
+import { api } from '@/api';
 import { Alert } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -36,7 +36,7 @@ export const TorrentsPage = () => {
   } = useQuery({
     queryKey: [TORRENTS_QUERY_KEY],
     queryFn: async () => {
-      const req = await client.torrents.$get();
+      const req = await api.torrents.$get();
       return await req.json();
     },
     enabled: !!user && user.role === UserRole.ADMIN,
@@ -87,7 +87,7 @@ export const TorrentsPage = () => {
           </TableHeader>
           <TableBody ref={animatedParent}>
             {torrents.map((torrent) => (
-              <TableRow key={torrent.hash}>
+              <TableRow key={torrent.infoHash}>
                 <TableCell>
                   <span className="break-all line-clamp-3 overflow-hidden overflow-ellipsis">
                     {torrent.name}

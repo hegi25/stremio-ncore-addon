@@ -1,12 +1,12 @@
 import { eq } from 'drizzle-orm';
 import { encodeBase32LowerCaseNoPadding } from '@oslojs/encoding';
 import bcrypt from 'bcryptjs';
+import { db } from 'src/db';
+import { UserRole, usersTable } from 'src/db/schema/users';
+import type { CreateUserRequest, UpdateUserRequest } from 'src/schemas/user.schema';
+import { User } from 'src/types/user';
+import type { LoginCredentials } from 'src/schemas/login.schema';
 import { PASSWORD_SALT_ROUNDS } from './user.constants';
-import { db } from '@/db';
-import { UserRole, usersTable } from '@/db/schema/users';
-import type { CreateUserRequest, UpdateUserRequest } from '@/types/user';
-import { User } from '@/types/user';
-import type { LoginCredentials } from '@/schemas/login.schema';
 
 export async function getUserByToken(token: string): Promise<User | null> {
   const [user] = await db.select().from(usersTable).where(eq(usersTable.token, token));
@@ -54,6 +54,7 @@ export function updateUserRequestToUpdateStatement(user: UpdateUserRequest) {
     username: user.username,
     preferred_language: user.preferredLanguage,
     preferred_resolutions: user.preferredResolutions,
+    token_rotated_at: new Date(),
   } satisfies Omit<typeof usersTable.$inferInsert, 'passwordHash' | 'role' | 'token'>;
   return updateStatement;
 }

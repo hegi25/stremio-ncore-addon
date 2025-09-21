@@ -1,9 +1,9 @@
 import { createMiddleware } from 'hono/factory';
 import { HTTPException } from 'hono/http-exception';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import type { ConfigurationResponse } from 'src/db/schema/configuration';
+import { HttpStatusCode } from 'src/types/http';
 import { getConfig } from './config.utils';
-import type { ConfigurationResponse } from '@/db/schema/configuration';
-import { HttpStatusCode } from '@/types/http';
 
 type ConfigEnv = {
   Variables: {

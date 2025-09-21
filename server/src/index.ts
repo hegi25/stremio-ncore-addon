@@ -2,8 +2,8 @@ import { createServer } from 'node:https';
 import { Hono } from 'hono';
 import { contextStorage } from 'hono/context-storage';
 import { serve } from '@hono/node-server';
-import { cors } from 'hono/cors';
 import { serveStatic } from '@hono/node-server/serve-static';
+import { cors } from 'hono/cors';
 import { env } from './env';
 import { logger, requestLogger } from './logger';
 import { authRoutes } from './app/auth';
@@ -14,7 +14,7 @@ import { manifestRoutes } from './app/manifest';
 import { configRoutes } from './app/config';
 import { HttpsService } from './app/https';
 
-const app = new Hono()
+export const app = new Hono()
   .use(contextStorage())
   .use(cors())
   .use(requestLogger)
@@ -24,7 +24,7 @@ const app = new Hono()
   .route('/', torrentRoutes)
   .route('/', streamRoutes)
   .route('/', configRoutes)
-  .use(serveStatic({ path: './client', root: import.meta.dirname }));
+  .use(serveStatic({ root: './client/dist' }));
 
 // HTTP server
 serve({
@@ -43,5 +43,3 @@ serve({
 logger.info(`HTTPS server started on port ${env.HTTPS_PORT}!`);
 
 logger.debug(`Server running in ${env.NODE_ENV} environment`);
-
-export type ApiRoutes = typeof app;

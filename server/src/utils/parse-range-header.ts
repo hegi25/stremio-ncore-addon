@@ -1,6 +1,6 @@
 import parseRange from 'range-parser';
 import { HTTPException } from 'hono/http-exception';
-import { HttpStatusCode } from '@/types/http';
+import { HttpStatusCode } from 'src/types/http';
 
 /**
  * Parses the Range header from a request and returns the start and end byte positions.

@@ -1,5 +1,5 @@
 import { useFormContext } from 'react-hook-form';
-import { CreateConfigRequest, UpdateConfigRequest } from '@server/schemas/config.schema';
+import { CreateConfigRequest, UpdateConfigRequest } from '@sna/server';
 import { Separator } from '../ui/separator';
 import { DeleteAfterHitnrun } from './delete-after-hitnrun';
 import {

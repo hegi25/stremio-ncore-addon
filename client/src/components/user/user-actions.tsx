@@ -1,4 +1,4 @@
-import { User } from '@server/types/user';
+import { User } from '@sna/server';
 import { useState } from 'react';
 import { EllipsisIcon, LockIcon, PencilIcon, Trash2Icon } from 'lucide-react';
 import { UpdatePasswordModal } from '../update-password/update-password-modal';

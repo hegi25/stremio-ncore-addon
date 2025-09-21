@@ -6,7 +6,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
-    "customConditions": ["source"],
+    "customConditions": ["@sna/source"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -25,13 +25,8 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
-      "@server/*": ["../server/src/*"]
+      "@sna/server/*": ["../server/dist/*"]
     }
   },
-  "include": ["src"],
-  "references": [
-    {
-      "path": "../server/tsconfig.json"
-    }
-  ]
+  "include": ["src"]
 }

@@ -1,5 +1,11 @@
 import cookieParser from 'set-cookie-parser';
 import { JSDOM } from 'jsdom';
+import { cacheFunction, DEFAULT_MAX, DEFAULT_TTL } from 'src/utils/cache';
+import { logger } from 'src/logger';
+import { env } from 'src/env';
+import { getAllPromiseResults } from 'src/utils/get-all-promise-results';
+import { batchAsyncFunctions } from 'src/utils/process-in-batches';
+import { StreamType } from 'src/schemas/stream.schema';
 import { downloadAndParseTorrent } from '../torrent/torrent-file.utils';
 import type { ParsedTorrentDetails } from '../torrent/torrent.types';
 import {
@@ -16,12 +22,6 @@ import {
   MOVIE_CATEGORY_FILTERS,
   SERIES_CATEGORY_FILTERS,
 } from './ncore.constants';
-import { cacheFunction, DEFAULT_MAX, DEFAULT_TTL } from '@/utils/cache';
-import { logger } from '@/logger';
-import { env } from '@/env';
-import { getAllPromiseResults } from '@/utils/get-all-promise-results';
-import { batchAsyncFunctions } from '@/utils/process-in-batches';
-import { StreamType } from '@/schemas/stream.schema';
 
 const cookiesCache = {
   pass: null as string | null,
@@ -275,5 +275,31 @@ export async function getRemovableInfoHashes(): Promise<string[]> {
   } catch (error) {
     logger.error({ error }, 'Failed to get removable torrents from nCore');
     throw new Error('Failed to get removable torrents from nCore', { cause: error });
+  }
+}
+
+export async function isNcoreAccessible(): Promise<boolean> {
+  try {
+    const cookies = await _getCookies();
+    const response = await fetch(`${env.NCORE_URL}/torrents.php`, {
+      headers: {
+        cookie: cookies,
+      },
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!response.ok) {
+      logger.warn(
+        {
+          status: response.status,
+        },
+        `nCore is not accessible`,
+      );
+      return false;
+    }
+    logger.info(`nCore is accessible`);
+    return true;
+  } catch (error) {
+    logger.error({ error }, 'Failed to access nCore');
+    return false;
   }
 }

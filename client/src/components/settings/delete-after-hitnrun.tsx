@@ -1,5 +1,5 @@
 import { useController, useFormContext, useWatch } from 'react-hook-form';
-import { UpdateConfigRequest } from '@server/schemas/config.schema';
+import { UpdateConfigRequest } from '@sna/server';
 import { DEFAULT_HITNRUN_CRON, SetupFormValues } from '../../pages/setup/constants';
 import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';

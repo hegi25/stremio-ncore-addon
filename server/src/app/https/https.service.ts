@@ -1,9 +1,8 @@
 import { createSecureContext } from 'node:tls';
 import type { ServerOptions } from 'node:https';
-import type { LocalIpResponse } from './https.constants';
-import { localIpResponseSchema, ONE_HOUR } from './https.constants';
-import { env } from '@/env';
-import { logger } from '@/logger';
+import { env } from 'src/env';
+import { logger } from 'src/logger';
+import { localIpResponseSchema, ONE_HOUR, type LocalIpResponse } from './https.constants';
 
 export class HttpsService {
   private static localIpDetails: LocalIpResponse | null = null;

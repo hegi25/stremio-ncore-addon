@@ -1,5 +1,5 @@
-export { env, type Env } from './env';
+export { env } from './env';
 
-import { logger } from '@/logger';
+import { logger } from 'src/logger';
 
 logger.info('Environment variables parsed and loaded successfully.');

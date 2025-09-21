@@ -4,7 +4,13 @@ export {
   NcoreOrderDirection,
   NcoreSearchBy,
 } from './ncore.types';
-export * from './ncore.service';
+export {
+  getRemovableInfoHashes,
+  getTorrentUrlByNcoreId,
+  getTorrentsByImdbId,
+  getTorrentsByTitle,
+  isNcoreAccessible,
+} from './ncore.service';
 export {
   MovieCategory,
   SeriesCategory,

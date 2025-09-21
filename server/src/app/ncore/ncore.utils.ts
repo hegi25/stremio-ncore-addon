@@ -1,6 +1,6 @@
+import { getAllPromiseResults } from 'src/utils/get-all-promise-results';
+import { logger } from 'src/logger';
 import type { NcoreTorrent, NcorePageResponseJson } from './ncore.types';
-import { getAllPromiseResults } from '@/utils/get-all-promise-results';
-import { logger } from '@/logger';
 
 export async function getAllPages(
   getNcoreResponse: (page: number) => Promise<NcorePageResponseJson>,
@@ -9,7 +9,7 @@ export async function getAllPages(
   const results: NcoreTorrent[] = [];
 
   const firstResult = await getNcoreResponse(page);
-  results.concat(firstResult.results);
+  results.push(...firstResult.results);
   const totalResults = parseInt(firstResult.total_results, 10);
   if (totalResults > firstResult.results.length) {
     const lastPageNumber = Math.ceil(totalResults / firstResult.results.length);
@@ -21,7 +21,7 @@ export async function getAllPages(
     if (errors.length) {
       logger.warn({ errors }, 'Some pages failed to fetch when getting all nCore pages');
     }
-    results.concat(...pages.flatMap((p) => p.results));
+    results.push(...pages.flatMap((p) => p.results));
   }
   return results;
 }

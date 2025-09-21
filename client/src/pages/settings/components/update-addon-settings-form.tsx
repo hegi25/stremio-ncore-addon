@@ -1,21 +1,25 @@
-import { Configuration } from '@server/db/schema/configuration';
-import { UpdateConfigRequest, updateConfigSchema } from '@server/schemas/config.schema';
+import { ConfigurationResponse } from '@sna/server';
+import { UpdateConfigRequest, updateConfigSchema } from '@sna/server';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getUpdateAddonSettingsDefaultValues } from './constants';
 import { MutationKeys } from '@/constants/mutation-keys';
-import { client } from '@/api';
+import { api } from '@/api';
 import { handleError, HttpError } from '@/lib/errors';
 import { Button } from '@/components/ui/button';
 import { SettingsFormFields } from '@/components/settings/settings-form-fields';
 
-export const UpdateAddonSettingsForm = ({ config }: { config: Configuration }) => {
+export const UpdateAddonSettingsForm = ({
+  config,
+}: {
+  config: ConfigurationResponse;
+}) => {
   const { mutateAsync, isPending } = useMutation({
     mutationKey: [MutationKeys.UPDATE_SETTINGS],
     mutationFn: async (data: UpdateConfigRequest) => {
-      const req = await client.config.$put({ json: data });
+      const req = await api.config.$put({ json: data });
       if (!req.ok) {
         throw new HttpError(req);
       }

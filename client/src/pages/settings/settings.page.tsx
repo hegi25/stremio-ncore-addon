@@ -1,5 +1,5 @@
 import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { UserRole } from '@server/db/schema/users';
+import { UserRole } from '@sna/server';
 import { useQuery } from '@tanstack/react-query';
 import { Redirect } from 'wouter';
 import { PlusIcon } from 'lucide-react';
@@ -9,7 +9,7 @@ import { Alert } from '@/components/ui/alert';
 import { PageLoader } from '@/components/ui/page-loader';
 import { QueryKeys } from '@/constants/query-keys';
 import { useMe } from '@/hooks/use-me';
-import { client } from '@/api';
+import { api } from '@/api';
 import { CreateUserModal } from '@/components/user/create-user/create-user-modal';
 import { Button } from '@/components/ui/button';
 import { useConfig } from '@/hooks/use-config';
@@ -26,7 +26,7 @@ export const SettingsPage = () => {
   } = useQuery({
     queryKey: [QueryKeys.USERS],
     queryFn: async () => {
-      const response = await client.api.users.$get();
+      const response = await api.users.$get();
       return response.json();
     },
   });

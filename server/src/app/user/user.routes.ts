@@ -1,24 +1,24 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
+import { db } from 'src/db';
+import { usersTable } from 'src/db/schema/users';
+import { User } from 'src/types/user';
+import {
+  createUserSchema,
+  updatePasswordSchema,
+  updateUserSchema,
+} from 'src/schemas/user.schema';
+import { HttpStatusCode } from 'src/types/http';
+import { logger } from 'src/logger';
 import { useCookieAuth } from '../auth/auth.middleware';
+import { userFromUrlExists } from './user.middleware';
 import {
   createUserRequestToInsertStatement,
   generateRandomToken,
   hashPassword,
   updateUserRequestToUpdateStatement,
 } from './user.utils';
-import { userFromUrlExists } from './user.middleware';
-import { db } from '@/db';
-import { usersTable } from '@/db/schema/users';
-import { User } from '@/types/user';
-import {
-  createUserSchema,
-  updatePasswordSchema,
-  updateUserSchema,
-} from '@/schemas/user.schema';
-import { HttpStatusCode } from '@/types/http';
-import { logger } from '@/logger';
 
 export const userRoutes = new Hono()
   .basePath('/api/users')
@@ -125,6 +125,7 @@ export const userRoutes = new Hono()
           .update(usersTable)
           .set({
             token: newToken,
+            token_rotated_at: new Date(),
           })
           .where(eq(usersTable.id, userFromUrl.id));
         return c.json({ apiToken: newToken });

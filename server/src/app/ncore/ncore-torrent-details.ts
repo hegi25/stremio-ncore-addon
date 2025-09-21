@@ -1,4 +1,5 @@
 import { parseResolution } from '@ctrl/video-filename-parser';
+import { Language, Resolution } from 'src/db/schema/users';
 import {
   TorrentDetails,
   type ParsedTorrentDetails,
@@ -13,7 +14,6 @@ import {
   ncoreResolutionLabels,
   SeriesCategory,
 } from './ncore.constants';
-import { Language, Resolution } from '@/db/schema/users';
 
 export class NcoreTorrentDetails extends TorrentDetails {
   public sourceName = 'ncore';

@@ -1,20 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { editUserSchema } from '@server/schemas/user.schema';
-import { User } from '@server/types/user';
+import { updateUserSchema, User } from '@sna/server';
 import { FormProvider, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { client } from '@/api';
+import { api } from '@/api';
 import { UserFields } from '@/pages/setup/components/user-fields';
 import { QueryKeys } from '@/constants/query-keys';
 import { handleError, HttpError } from '@/lib/errors';
 import { useMe } from '@/hooks/use-me';
 
 const editUserFormSchema = z.object({
-  user: editUserSchema,
+  user: updateUserSchema,
 });
 
 type EditUserFormValues = z.infer<typeof editUserFormSchema>;
@@ -41,7 +40,7 @@ export const EditUserForm = ({
 
   const { mutateAsync } = useMutation({
     mutationFn: async (data: EditUserFormValues) => {
-      const req = await client.api.users[':userId'].$put({
+      const req = await api.users[':userId'].$put({
         json: data.user,
         param: { userId: `${user.id}` },
       });

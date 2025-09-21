@@ -18,7 +18,7 @@ export interface Configuration {
   deleteAfterHitnrunCron: string;
 }
 
-export interface ConfigurationResponse extends Configuration {
+export interface ConfigurationResponse extends Omit<Configuration, 'id'> {
   // The URL where the addon is hosted. Calculated based on addonLocation and localOnly.
   addonUrl: string;
 }

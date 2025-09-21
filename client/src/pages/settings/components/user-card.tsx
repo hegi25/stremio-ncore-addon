@@ -1,5 +1,5 @@
-import { UserRole } from '@server/db/schema/users';
-import { User } from '@server/types/user';
+import { UserRole } from '@sna/server';
+import { User } from '@sna/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserActions } from '@/components/user';
 import { languageLabelLookup } from '@/pages/setup/constants';

@@ -1,8 +1,8 @@
-import { Configuration } from '@server/db/schema/configuration';
-import { UpdateConfigRequest } from '@server/schemas/config.schema';
+import { ConfigurationResponse } from '@sna/server';
+import { UpdateConfigRequest } from '@sna/server';
 
 export const getUpdateAddonSettingsDefaultValues = (
-  config: Configuration,
+  config: ConfigurationResponse,
 ): UpdateConfigRequest => {
   return {
     addonLocation: {

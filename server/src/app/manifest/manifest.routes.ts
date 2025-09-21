@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
+import { HttpStatusCode } from 'src/types/http';
 import { getUserByToken } from '../user/user.utils';
 import { getConfig } from '../config/config.utils';
 import { getManifest } from './manifest.utils';
-import { HttpStatusCode } from '@/types/http';
 
 export const manifestRoutes = new Hono()
   .get('/manifest.json', (c) => {

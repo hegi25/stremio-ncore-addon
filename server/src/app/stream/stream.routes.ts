@@ -1,7 +1,10 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { HTTPException } from 'hono/http-exception';
-import mime from 'mime';
+import { getMimeType } from 'hono/utils/mime';
+import { logger } from 'src/logger';
+import { HttpStatusCode } from 'src/types/http';
+import { parseRangeHeader } from 'src/utils/parse-range-header';
 import { useUrlTokenAuth } from '../auth/auth.middleware';
 import {
   getTorrentsByImdbId,
@@ -10,17 +13,14 @@ import {
 } from '../ncore';
 import {
   addTorrent,
+  downloadTorrentFile,
   getTorrent,
   type TorrentDetails,
   type TorrentFileDetails,
 } from '../torrent';
 import { useIsConfigured } from '../config/config.middleware';
-import { downloadTorrentFile } from '../torrent/torrent-file.utils';
 import { convertTorrentToStream, getCinemetaData, orderTorrents } from './stream.utils';
 import { streamParamsSchema, type CinemetaResponse } from './stream.constants';
-import { logger } from '@/logger';
-import { HttpStatusCode } from '@/types/http';
-import { parseRangeHeader } from '@/utils/parse-range-header';
 
 export const streamRoutes = new Hono()
   .basePath('/api')
@@ -109,7 +109,7 @@ export const streamRoutes = new Hono()
         );
         throw new HTTPException(HttpStatusCode.NOT_FOUND);
       }
-      const fileType = mime.getType(file.path) || 'application/octet-stream';
+      const fileType = getMimeType(file.path) || 'application/octet-stream';
 
       if (c.req.method === 'HEAD') {
         return c.body(null, 200, {

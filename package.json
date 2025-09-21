@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "rm -rf dist && pnpm build:server && pnpm build:client",
+    "build": "pnpm build:server && pnpm build:client",
     "build:server": "pnpm --filter server build",
     "build:client": "pnpm --filter client build",
     "dev": "pnpm dev:server & pnpm dev:client",
     "dev:server": "pnpm --filter server dev",
     "dev:client": "pnpm --filter client dev",
-    "start": "NODE_ENV=production node dist/server/index.js",
-    "preview": "NODE_ENV=production node --env-file .env dist/server/index.js",
+    "start": "NODE_ENV=production node server/dist/index.js",
+    "preview": "NODE_ENV=production node --env-file .env server/dist/index.js",
     "ci": "pnpm check-formatting && pnpm lint && pnpm test",
     "check-formatting": "prettier --check .",
     "format": "prettier --write .",
@@ -22,21 +22,24 @@
     "release": "docker buildx build --platform linux/amd64,linux/arm64 -t detarkende/stremio-ncore-addon:$npm_config_name . --push"
   },
   "dependencies": {
-    "hono": "4.7.2",
+    "cron-validator": "^1.4.0",
+    "hono": "4.9.7",
     "zod": "3.25.67"
   },
   "devDependencies": {
+    "eslint": "^9.36.0",
     "prettier": "^3.5.3",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.8.3",
-    "vite": "^6.3.5",
-    "vitest": "^3.1.4"
+    "vite": "^7.1.6",
+    "vitest": "^3.2.4"
   },
   "pnpm": {
     "allowNonAppliedPatches": true,
     "patchedDependencies": {
       "@types/parse-torrent": "patches/@types__parse-torrent.patch",
       "@types/stremio-addon-sdk": "patches/@types__stremio-addon-sdk.patch",
-      "@types/webtorrent": "patches/@types__webtorrent.patch"
+      "webtorrent": "patches/webtorrent.patch"
     }
   },
   "packageManager": "pnpm@9.12.2"

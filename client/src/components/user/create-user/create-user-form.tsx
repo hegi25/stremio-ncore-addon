@@ -1,15 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createUserSchema } from '@server/schemas/user.schema';
+import { createUserSchema } from '@sna/server';
 import { FormProvider, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Language } from '@server/db/schema/users';
+import { Language } from '@sna/server';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CreateUserRequest } from '@server/types/user';
+import { CreateUserRequest } from '@sna/server';
 import { toast } from 'sonner';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { MutationKeys } from '@/constants/mutation-keys';
-import { client } from '@/api';
+import { api } from '@/api';
 import { UserFields } from '@/pages/setup/components/user-fields';
 import { QueryKeys } from '@/constants/query-keys';
 import { handleError, HttpError } from '@/lib/errors';
@@ -37,7 +37,7 @@ export const CreateUserForm = ({ closeModal }: { closeModal: () => void }) => {
 
   const { mutateAsync } = useMutation({
     mutationFn: async (data: CreateUserRequest) => {
-      const req = await client.api.users.$post({
+      const req = await api.users.$post({
         json: data,
       });
       if (!req.ok) {

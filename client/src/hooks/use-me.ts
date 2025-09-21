@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { client } from '@/api';
+import { api } from '@/api';
 import { QueryKeys } from '@/constants/query-keys';
 import { handleError, HttpError } from '@/lib/errors';
 
@@ -8,7 +8,7 @@ export const useMe = () => {
   const queryClient = useQueryClient();
   const { mutateAsync: logout } = useMutation({
     mutationFn: async () => {
-      const req = await client.api.logout.$post();
+      const req = await api.logout.$post();
       if (!req.ok) {
         throw new HttpError(req);
       }
@@ -22,7 +22,7 @@ export const useMe = () => {
   const query = useQuery({
     queryKey: [QueryKeys.ME],
     queryFn: async () => {
-      const req = await client.api.me.$get();
+      const req = await api.users.me.$get();
       if (!req.ok) {
         return null;
       }

@@ -1,16 +1,21 @@
-import { TorrentStoreStats } from '@server/services/torrent-store';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { TORRENTS_QUERY_KEY } from '../constants';
+import { api } from '@/api';
 import { Button } from '@/components/ui/button';
-import { client } from '@/api';
 import { FullScreenLoader } from '@/components/ui/full-screen-loader';
 
-export const DeleteTorrentButton = ({ torrent }: { torrent: TorrentStoreStats }) => {
+export const DeleteTorrentButton = ({
+  torrent,
+}: {
+  torrent: Awaited<
+    ReturnType<Awaited<ReturnType<typeof api.torrents.$get>>['json']>
+  >[number];
+}) => {
   const queryClient = useQueryClient();
   const { mutateAsync: deleteTorrent, isPending } = useMutation({
     mutationFn: async () => {
-      await client.torrents[':infoHash'].$delete({
-        param: { infoHash: torrent.hash },
+      await api.torrents[':infoHash'].$delete({
+        param: { infoHash: torrent.infoHash },
       });
     },
   });

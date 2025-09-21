@@ -83,7 +83,7 @@ export const envSchema = z
     };
   });
 
-export type Env = z.infer<typeof envSchema>;
+type Env = z.infer<typeof envSchema>;
 
 const envParseResult = envSchema.safeParse(process.env);
 if (!envParseResult.success) {

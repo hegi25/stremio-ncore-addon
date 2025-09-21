@@ -2,10 +2,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CreateConfigRequest, createConfigSchema } from '@server/schemas/config.schema';
+import { CreateConfigRequest, createConfigSchema } from '@sna/server';
 import { useLocation } from 'wouter';
 import { defaultSetupFormValues } from '../constants';
-import { NonAdminUsers } from './non-admin-users';
 import { UserFields } from './user-fields';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +19,7 @@ import { Form } from '@/components/ui/form';
 
 import { Separator } from '@/components/ui/separator';
 import { MutationKeys } from '@/constants/mutation-keys';
-import { client } from '@/api';
+import { api } from '@/api';
 import { QueryKeys } from '@/constants/query-keys';
 import { handleError, HttpError } from '@/lib/errors';
 import { SettingsFormFields } from '@/components/settings/settings-form-fields';
@@ -31,7 +30,7 @@ export const SetupForm = () => {
   const queryClient = useQueryClient();
   const { mutateAsync } = useMutation({
     mutationFn: async (data: CreateConfigRequest) => {
-      const req = await client.config.$post({ json: data });
+      const req = await api.config.$post({ json: data });
       if (!req.ok) {
         throw new HttpError(req);
       }
@@ -79,8 +78,6 @@ export const SetupForm = () => {
             </div>
 
             <Separator />
-
-            <NonAdminUsers />
           </CardContent>
           <CardFooter>
             <Button

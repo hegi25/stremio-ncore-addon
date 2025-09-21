@@ -1,10 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { updatePasswordSchema } from '@server/schemas/user.schema';
-import { UpdatePasswordRequest, User } from '@server/types/user';
+import { updatePasswordSchema, UpdatePasswordRequest, User } from '@sna/server';
 import { useMutation } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { client } from '@/api';
+import { api } from '@/api';
 import { Button } from '@/components/ui/button';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -28,7 +27,7 @@ export const UpdatePasswordForm = ({
   });
   const { mutateAsync } = useMutation({
     mutationFn: async (data: UpdatePasswordRequest) => {
-      const req = await client.api.users[':userId'].password.$put({
+      const req = await api.users[':userId'].password.$put({
         json: data,
         param: { userId: `${user.id}` },
       });

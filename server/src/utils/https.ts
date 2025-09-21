@@ -1,4 +1,4 @@
-import { env } from '@/env';
+import { env } from 'src/env';
 
 export const getLocalIpUrl = (ip: string, port: number) => {
   const ipSubdomain = ip.replace(/\./g, '-');

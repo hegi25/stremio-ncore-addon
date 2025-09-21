@@ -1,2 +1,2 @@
-export { client } from './api-client';
+export { api } from './api-client';
 export * from './query-client';

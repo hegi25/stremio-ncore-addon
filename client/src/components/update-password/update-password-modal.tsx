@@ -1,4 +1,4 @@
-import { User } from '@server/types/user';
+import { User } from '@sna/server';
 import { UpdatePasswordForm } from './update-password-form';
 import {
   Dialog,

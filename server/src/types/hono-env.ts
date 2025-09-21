@@ -1,5 +1,5 @@
+import type { Session } from 'src/db/schema/sessions';
 import type { User } from './user';
-import type { Session } from '@/db/schema/sessions';
 
 export type HonoEnv = {
   Variables:

@@ -1,4 +1,4 @@
-import { User } from '@server/types/user';
+import { User } from '@sna/server';
 import { EditUserForm } from './edit-user-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 

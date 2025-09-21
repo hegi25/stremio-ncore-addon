@@ -29,5 +29,6 @@ export const usersTable = sqliteTable('users', {
   role: text({ enum: userRoleValues }).$type<UserRole>().notNull(),
   preferred_resolutions: text({ mode: 'json' }).$type<Resolution[]>().notNull(),
   preferred_language: text({ enum: languageValues }).$type<Language>().notNull(),
-  token: text().notNull(),
+  token: text().notNull().unique(),
+  token_rotated_at: integer({ mode: 'timestamp' }).notNull(),
 });
