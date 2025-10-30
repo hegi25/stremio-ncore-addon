@@ -1,24 +1,77 @@
 import { rmSync } from 'fs';
+import { rm } from 'fs/promises';
 import { ok, type Result } from 'neverthrow';
 import { globSync } from 'glob';
 import type { Torrent } from 'webtorrent';
 import WebTorrent from 'webtorrent';
+import type { TorrentService } from '@/services/torrent';
 import type { NcoreService } from '../ncore';
-import type { TorrentResponse, TorrentStoreStats } from './types';
+import type { TorrentResponse, InfoHash, TorrentStoreStats } from './types';
 import { createTorrentServerError, type TorrentServerError } from '@/errors';
 import { logger } from '@/logger';
 import { env } from '@/env';
 import { formatBytes } from '@/utils/bytes';
+import path from 'node:path';
 
 export class TorrentStoreService {
+  private ongoingTorrents = new Map<string, Promise<TorrentResponse>>();
   private webtorrent: WebTorrent;
-  constructor(private ncoreService: NcoreService) {
+  private torrentFilePaths = new Map<InfoHash, string>();
+  constructor(
+    private ncoreService: NcoreService,
+    private torrentService: TorrentService,
+  ) {
     this.webtorrent = new WebTorrent({
       torrentPort: env.TORRENT_PORT,
+      utp: false,
     });
   }
 
   public async startServer(): Promise<void> {}
+
+  public async getOrAddTorrent(
+    infoHash: string,
+    ncoreId: string,
+  ): Promise<TorrentResponse> {
+    if (this.ongoingTorrents.has(infoHash)) {
+      return this.ongoingTorrents.get(infoHash)!;
+    }
+
+    const promise = (async () => {
+      const torrentResult = await this.getTorrent(infoHash);
+      let torrent = torrentResult.isOk() ? torrentResult.value : null;
+
+      if (!torrent) {
+        const torrentUrlResult = await this.ncoreService.getTorrentUrlByNcoreId(ncoreId);
+        if (torrentUrlResult.isErr() || !torrentUrlResult.value) {
+          throw new Error(`Failed to get torrent URL for nCoreId ${ncoreId}`);
+        }
+
+        const torrentFilePathResult = await this.torrentService.downloadTorrentFile(
+          torrentUrlResult.value,
+        );
+        if (torrentFilePathResult.isErr()) {
+          throw new Error(`Failed to download torrent for nCoreId ${ncoreId}`);
+        }
+
+        const addResult = await this.addTorrent(torrentFilePathResult.value);
+        if (addResult.isErr()) {
+          throw new Error(`Failed to add torrent to store for nCoreId ${ncoreId}`);
+        }
+        torrent = addResult.value;
+      }
+
+      return torrent;
+    })();
+
+    this.ongoingTorrents.set(infoHash, promise);
+
+    try {
+      return await promise;
+    } finally {
+      this.ongoingTorrents.delete(infoHash);
+    }
+  }
 
   private mapToTorrentResponse(torrent: Torrent): TorrentResponse {
     return {
@@ -50,6 +103,7 @@ export class TorrentStoreService {
               storeCacheSlots: 0,
             },
             (torrent: Torrent) => {
+              this.torrentFilePaths.set(torrent.infoHash, torrentFilePath);
               resolve(torrent);
             },
           );
@@ -95,15 +149,36 @@ export class TorrentStoreService {
   public async deleteTorrent(
     infoHash: string,
   ): Promise<Result<void, TorrentServerError>> {
+    logger.info({ infoHash }, 'Deleting torrent');
     try {
       const torrent = await this.webtorrent.get(infoHash);
       if (!torrent) {
+        logger.info({ infoHash }, 'Cannot find Deleting torrent');
         return ok();
       }
-      rmSync(torrent.path, { recursive: true });
-      torrent.destroy();
+      torrent.destroy({ destroyStore: true }, (err) => {
+        if (err) console.error('Failed to destroy torrent store', err);
+      });
+      logger.info(`delete path: ${path.join(torrent.path, torrent.name)}`);
+      rmSync(path.join(torrent.path, torrent.name), { recursive: true });
+      const torrentFilePath = this.torrentFilePaths.get(infoHash);
+      if (!torrentFilePath) {
+        return createTorrentServerError(
+          `Failed to delete torrent file. File not found.`,
+          { torrentFilePath },
+        );
+      }
+
+      await rm(torrentFilePath);
+      this.torrentFilePaths.delete(infoHash);
+
       return ok();
     } catch (error: unknown) {
+      if (error instanceof Error) {
+        logger.info(`delete error: ${error.message}`, { stack: error.stack });
+      } else {
+        logger.info(`delete error: ${JSON.stringify(error)}`);
+      }
       return createTorrentServerError(
         `Failed to delete torrent with info hash: ${infoHash}`,
         error,

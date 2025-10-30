@@ -89,16 +89,11 @@ export class StreamController {
   public async play(c: Context<HonoEnv, string, { out: { param: PlaySchema } }>) {
     const { ncoreId, infoHash, filePath } = c.req.valid('param');
 
-    const torrentResult = await this.torrentStoreService.getTorrent(infoHash);
-    if (torrentResult.isErr()) {
-      // This is not a "not found" case, but rather a case where the torrent store threw an error
-      logger.error(
-        { error: torrentResult.error },
-        'Error while getting torrent from torrent server. Returning status 500',
-      );
-      throw new HTTPException(HttpStatusCode.INTERNAL_SERVER_ERROR);
-    }
-    let torrent = torrentResult.value;
+    const torrentResult = await this.torrentStoreService.getOrAddTorrent(
+      infoHash,
+      ncoreId,
+    );
+    let torrent = torrentResult;
 
     if (!torrent) {
       const torrentUrlResult = await this.ncoreService.getTorrentUrlByNcoreId(ncoreId);
